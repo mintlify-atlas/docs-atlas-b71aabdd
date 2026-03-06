@@ -1,0 +1,102 @@
+{
+  "projectType": "frontend",
+  "projectName": "Pokémon Explorer",
+  "projectDescription": "An interactive web-based Pokédex that lets users discover and explore over 1,300 Pokémon with advanced search and filtering capabilities.",
+  "theme": "palm",
+  "primaryColor": "#EE1515",
+  "lightColor": "#F8D030",
+  "darkColor": "#3B4CCA",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "installation"
+            ]
+          },
+          {
+            "group": "Features",
+            "pages": [
+              "features/search",
+              "features/filters",
+              "features/pokemon-cards",
+              "features/pagination"
+            ]
+          },
+          {
+            "group": "User Guide",
+            "pages": [
+              "guide/searching",
+              "guide/filtering",
+              "guide/audio-features",
+              "guide/interactive-tour"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Core Classes",
+            "pages": [
+              "api/pokemon-explorer",
+              "api/pokemon-tour"
+            ]
+          },
+          {
+            "group": "Methods",
+            "pages": [
+              "api/search-methods",
+              "api/filter-methods",
+              "api/data-methods"
+            ]
+          },
+          {
+            "group": "Configuration",
+            "pages": [
+              "api/constants",
+              "api/translations"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Real-time search by name, type, color, habitat, size, and weight",
+    "Multi-criteria smart search with Spanish and English keyword support",
+    "Advanced filtering by Pokémon type, generation, color, and habitat",
+    "Interactive Pokémon cards with detailed stats, abilities, and images",
+    "Audio playback of Pokémon cries",
+    "Pagination for browsing large result sets",
+    "Search suggestions and auto-complete",
+    "Interactive guided tour for new users",
+    "Responsive design with animated UI elements",
+    "Integration with PokeAPI for comprehensive Pokémon data"
+  ],
+  "publicApiSurface": [
+    "PokemonExplorer (main class)",
+    "PokemonExplorer.loadPokemon()",
+    "PokemonExplorer.handleSearch(query)",
+    "PokemonExplorer.applyFilters()",
+    "PokemonExplorer.performSmartSearch(criteria)",
+    "PokemonExplorer.fetchPokemonDetails(idOrName)",
+    "PokemonExplorer.createPokemonCard(pokemon)",
+    "PokemonExplorer.playPokemonCry(cryUrl, button)",
+    "PokemonTour (tour class)",
+    "PokemonTour.start()",
+    "parseSmartSearch(query)",
+    "translate(key, translationMap)",
+    "constants.typeTranslations",
+    "constants.abilityTranslations",
+    "constants.colorTranslations",
+    "constants.habitatTranslations",
+    "constants.searchKeywords"
+  ]
+}
