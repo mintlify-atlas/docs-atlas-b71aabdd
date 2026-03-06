@@ -1,0 +1,219 @@
+---
+title: Introduction
+description: Welcome to Pokémon Explorer - an interactive web application for discovering and exploring Pokémon data
+---
+
+# Welcome to Pokémon Explorer
+
+Pokémon Explorer is a modern, interactive web application built with vanilla JavaScript that lets you browse, search, and discover detailed information about over 1,300 Pokémon from all nine generations.
+
+## What is Pokémon Explorer?
+
+Pokémon Explorer is a frontend web application that consumes the [PokeAPI](https://pokeapi.co/) to provide an engaging, arcade-style interface for exploring the Pokémon universe. Users can search by name, filter by type, generation, color, habitat, and more—all with real-time validation and suggestions.
+
+<CardGroup cols={2}>
+  <Card title="Search & Filter" icon="magnifying-glass">
+    Real-time search with smart keyword detection and multiple filter options
+  </Card>
+  <Card title="Interactive Cards" icon="cards-blank">
+    Beautiful, glassmorphic cards with stats, abilities, and Pokémon cries
+  </Card>
+  <Card title="Pagination" icon="list-ol">
+    Browse through 12 Pokémon per page with smooth navigation
+  </Card>
+  <Card title="Responsive Design" icon="mobile">
+    Arcade-themed UI that works perfectly on desktop, tablet, and mobile
+  </Card>
+</CardGroup>
+
+## Key Features
+
+### Real-Time Search
+
+Search Pokémon by name with intelligent autocomplete suggestions:
+
+```javascript
+handleSearch(query) {
+    clearTimeout(this.searchTimeout);
+    this.clearError();
+
+    if (!query.trim()) {
+        this.hideSuggestions();
+        this.applyFilters();
+        return;
+    }
+
+    if (query.length < 2) {
+        this.showError('Ingresa al menos 2 caracteres');
+        return;
+    }
+
+    this.searchTimeout = setTimeout(() => this.performSearch(query), 300);
+    this.updateSuggestions(query);
+}
+```
+
+### Advanced Filtering
+
+Filter Pokémon by multiple criteria including:
+- **Type**: Fire, Water, Grass, Electric, and 14 more types
+- **Generation**: Gen I (Kanto) through Gen IX (Paldea)
+- **Color**: Black, Blue, Brown, Gray, Green, Pink, Purple, Red, White, Yellow
+- **Habitat**: Cave, Forest, Grassland, Mountain, Sea, Urban, and more
+- **Size & Weight**: Custom filters for height and weight ranges
+
+### Smart Search Keywords
+
+The application supports natural language search in Spanish and English:
+
+```javascript
+searchKeywords: {
+    'fuego': 'fire', 'agua': 'water', 'planta': 'grass', 
+    'eléctrico': 'electric', 'bosque': 'forest', 
+    'rojo': 'red', 'grande': 'large', 'pesado': 'heavy'
+}
+```
+
+<Info>
+You can search using combinations like "planta verde" (green grass type) or "fuego pequeño" (small fire type) for precise results.
+</Info>
+
+## Architecture Overview
+
+### Technology Stack
+
+<CardGroup cols={3}>
+  <Card title="HTML5" icon="code">
+    Semantic markup with accessibility features
+  </Card>
+  <Card title="CSS3" icon="paintbrush">
+    Modern design with glassmorphism and arcade aesthetics
+  </Card>
+  <Card title="Vanilla JavaScript" icon="js">
+    Zero dependencies, pure ES6+ with class-based architecture
+  </Card>
+</CardGroup>
+
+### Core Class: PokemonExplorer
+
+The application is built around a single `PokemonExplorer` class that handles:
+
+```javascript
+class PokemonExplorer {
+    constructor() {
+        this.API_BASE_URL = 'https://pokeapi.co/api/v2';
+        this.currentPage = 1;
+        this.pokemonPerPage = 12;
+        this.allPokemon = [];
+        this.filteredPokemon = [];
+        this.pokemonById = new Map();
+        this.pokemonByName = new Map();
+        
+        this.setupEventListeners();
+        this.loadInitialData();
+    }
+}
+```
+
+### Data Management
+
+The app uses intelligent caching to minimize API calls:
+
+- **Maps for O(1) lookups**: `pokemonById` and `pokemonByName` for instant access
+- **Batch loading**: Loads Pokémon in batches of 50 for optimal performance
+- **Lazy loading**: Only fetches detailed data when needed
+- **Species data**: Enriches Pokémon with color and habitat information
+
+<Note>
+The application caches all fetched Pokémon data to provide instant filtering and searching without redundant API calls.
+</Note>
+
+## Design Philosophy
+
+### Arcade Aesthetic
+
+The interface features a retro arcade theme with:
+- Neon border animations
+- Floating pixel effects
+- Glassmorphic cards with vibrant gradients
+- Press Start 2P and VT323 fonts for authentic retro feel
+
+```css
+body::before {
+    content: "";
+    position: fixed;
+    height: 6px;
+    background: linear-gradient(90deg, #ff0055 0%, #fff900 50%, #00eaff 100%);
+    filter: blur(1.5px) brightness(1.2);
+    animation: neon-move 3s linear infinite alternate;
+}
+```
+
+### Responsive & Accessible
+
+The application adapts seamlessly to all screen sizes:
+- **Desktop**: 4-column grid layout
+- **Tablet**: 2-3 column responsive grid
+- **Mobile**: Single column with optimized touch targets
+
+## Interactive Features
+
+### Pokémon Cries
+
+Click the 🔊 button to hear authentic Pokémon sounds from the PokeAPI:
+
+```javascript
+playPokemonCry(cryUrl, button) {
+    this.currentAudio = new Audio(cryUrl);
+    this.currentAudio.volume = 0.4;
+    this.currentAudio.play().catch(error => {
+        console.error('Error al reproducir Pokémon Cry:', error);
+    });
+}
+```
+
+### Guided Tour
+
+A custom-built interactive tour helps new users understand all features:
+
+<Steps>
+  <Step title="Smart Search">
+    Learn how to search by name, type, color, or combine multiple criteria
+  </Step>
+  <Step title="Advanced Filters">
+    Explore filtering options for type, generation, habitat, and more
+  </Step>
+  <Step title="Pokémon Cards">
+    Discover how to view stats, abilities, and hear Pokémon cries
+  </Step>
+  <Step title="Pagination">
+    Navigate through pages of results efficiently
+  </Step>
+</Steps>
+
+## Project Structure
+
+```
+pokedex/
+├── index.html          # Main HTML structure
+├── styles.css          # Complete styling with arcade theme
+├── logica.js           # PokemonExplorer class and all logic
+├── Assets/
+│   └── PokeBola.png    # Favicon
+└── README.md           # Project documentation
+```
+
+<Tip>
+All application logic is contained in a single class-based JavaScript file, making it easy to understand and maintain.
+</Tip>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="rocket" href="/quickstart">
+    Get up and running in 2 minutes
+  </Card>
+  <Card title="Installation" icon="download" href="/installation">
+    Set up the project locally on your machine
+  </Card>
+</CardGroup>

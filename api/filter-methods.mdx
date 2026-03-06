@@ -1,0 +1,267 @@
+---
+title: 'Filter Methods'
+description: 'Methods for applying filters and loading Pokémon by specific criteria'
+---
+
+## applyFilters()
+
+Applies all selected filters from the UI to the Pokémon list.
+
+### Behavior
+
+- Reads values from all filter elements (type, generation, color, habitat, size, weight)
+- Validates that the selected type exists in available types
+- Shows loading indicator during filter application
+- Ensures necessary Pokémon data is loaded for generation and type filters
+- Applies all criteria using `_applyPokemonFilters()`
+- Resets pagination to page 1
+- Updates display and pagination
+- Handles errors gracefully
+
+### Filter Criteria
+
+<ParamField path="type" type="string">
+  Pokémon type (normal, fire, water, electric, grass, etc.)
+</ParamField>
+
+<ParamField path="generation" type="string">
+  Generation number (1-9)
+</ParamField>
+
+<ParamField path="color" type="string">
+  Pokémon color (black, blue, brown, gray, green, pink, purple, red, white, yellow)
+</ParamField>
+
+<ParamField path="habitat" type="string">
+  Pokémon habitat (cave, forest, grassland, mountain, rare, rough-terrain, sea, urban, waters-edge)
+</ParamField>
+
+<ParamField path="size" type="string">
+  Size category based on height
+</ParamField>
+
+<ParamField path="weight" type="string">
+  Weight category
+</ParamField>
+
+### Example
+
+```javascript
+async applyFilters() {
+    const { typeFilter, generationFilter, colorFilter, habitatFilter, sizeFilter, weightFilter } = this.elements;
+    const criteria = {
+        type: typeFilter?.value || null,
+        generation: generationFilter?.value || null,
+        color: colorFilter?.value || null,
+        habitat: habitatFilter?.value || null,
+        size: sizeFilter?.value || null,
+        weight: weightFilter?.value || null
+    };
+
+    if (criteria.type && !this.pokemonTypes.some(t => t.name === criteria.type)) {
+        this.filteredPokemon = [];
+        this.currentPage = 1;
+        this.displayPokemon();
+        this.updatePagination();
+        this.showError('Este tipo estará disponible muy pronto.');
+        return;
+    }
+
+    this.showLoading(true);
+
+    try {
+        if (criteria.generation) {
+            await this.ensureGenerationLoaded(criteria.generation);
+        }
+        if (criteria.type) {
+            await this.loadPokemonByType(criteria.type);
+        }
+
+        this.filteredPokemon = this._applyPokemonFilters([...this.pokemonById.values()], criteria);
+
+    } catch (error) {
+        console.error('Error al aplicar filtros:', error);
+        this.showError('Error al aplicar filtros');
+    } finally {
+        this.showLoading(false);
+    }
+
+    this.currentPage = 1;
+    this.clearError();
+    this.displayPokemon();
+    this.updatePagination();
+}
+```
+
+---
+
+## _applyPokemonFilters()
+
+Internal method that filters a Pokémon list based on multiple criteria.
+
+<ParamField path="pokemonList" type="array" required>
+  Array of Pokémon objects to filter
+</ParamField>
+
+<ParamField path="criteria" type="object" required>
+  Object containing filter criteria:
+  - `name`: string - Filter by name (partial match)
+  - `type`: string - Filter by type
+  - `color`: string - Filter by color
+  - `habitat`: string - Filter by habitat
+  - `generation`: string - Filter by generation number
+  - `size`: string - Filter by size category
+  - `weight`: string - Filter by weight category
+</ParamField>
+
+<ResponseField name="return" type="array">
+  Filtered array of Pokémon objects matching all criteria
+</ResponseField>
+
+### Size Categories
+
+- **tiny**: Height < 0.5m
+- **small**: Height 0.5m - 1m
+- **medium**: Height 1m - 2m
+- **large**: Height 2m - 3m
+- **huge**: Height >= 3m
+
+### Weight Categories
+
+- **light**: Weight < 10kg
+- **normal**: Weight 10kg - 50kg
+- **heavy**: Weight 50kg - 100kg
+- **massive**: Weight >= 100kg
+
+### Example
+
+```javascript
+_applyPokemonFilters(pokemonList, criteria) {
+    return pokemonList.filter(p => {
+        if (criteria.name && !p.name.toLowerCase().includes(criteria.name.toLowerCase())) return false;
+        if (criteria.type && !p.types.includes(criteria.type)) return false;
+        if (criteria.color && p.color !== criteria.color) return false;
+        if (criteria.habitat && p.habitat !== criteria.habitat) return false;
+
+        if (criteria.generation) {
+            const [start, end] = this.constants.genRanges[criteria.generation];
+            if (p.id < start || p.id > end) return false;
+        }
+
+        if (criteria.size) {
+            const height = p.height;
+            switch (criteria.size) {
+                case 'tiny': if (height >= 0.5) return false; break;
+                case 'small': if (height < 0.5 || height >= 1) return false; break;
+                case 'medium': if (height < 1 || height >= 2) return false; break;
+                case 'large': if (height < 2 || height >= 3) return false; break;
+                case 'huge': if (height < 3) return false; break;
+            }
+        }
+
+        if (criteria.weight) {
+            const weight = p.weight;
+            switch (criteria.weight) {
+                case 'light': if (weight >= 10) return false; break;
+                case 'normal': if (weight < 10 || weight >= 50) return false; break;
+                case 'heavy': if (weight < 50 || weight >= 100) return false; break;
+                case 'massive': if (weight < 100) return false; break;
+            }
+        }
+
+        return true;
+    });
+}
+```
+
+---
+
+## loadPokemonByType()
+
+Loads all Pokémon of a specific type from the API if not already cached.
+
+<ParamField path="type" type="string" required>
+  The Pokémon type to load (fire, water, grass, etc.)
+</ParamField>
+
+### Behavior
+
+- Checks if enough Pokémon of the requested type are already loaded (threshold: 10)
+- If not, fetches complete list from PokéAPI's type endpoint
+- Filters results to only include Pokémon with ID less than or equal to 1025
+- Loads missing Pokémon details using `loadMissingPokemon()`
+- Updates internal caches (`pokemonById`, `pokemonByName`, `allPokemon`)
+
+### Example
+
+```javascript
+async loadPokemonByType(type) {
+    const currentTypePokemons = [...this.pokemonById.values()].filter(p => p.types.includes(type));
+
+    if (currentTypePokemons.length < 10) {
+        try {
+            const response = await fetch(`${this.API_BASE_URL}/type/${type}`);
+            const pokemonList = (await response.json()).pokemon
+                .map(p => p.pokemon)
+                .filter(p => parseInt(p.url.split('/').slice(-2, -1)[0]) <= 1025);
+
+            await this.loadMissingPokemon(pokemonList, 'name');
+        } catch (error) {
+            console.error('Error al cargar pokemon por tipo:', error);
+        }
+    }
+}
+```
+
+<Note>
+This method optimizes performance by only fetching data when the cache is insufficient.
+</Note>
+
+---
+
+## ensureGenerationLoaded()
+
+Ensures all Pokémon from a specific generation are loaded into memory.
+
+<ParamField path="genNumber" type="string" required>
+  Generation number ("1" through "9")
+</ParamField>
+
+### Generation Ranges
+
+<Accordion title="View Generation Ranges">
+  - **Generation 1**: ID 1-151 (Kanto)
+  - **Generation 2**: ID 152-251 (Johto)
+  - **Generation 3**: ID 252-386 (Hoenn)
+  - **Generation 4**: ID 387-493 (Sinnoh)
+  - **Generation 5**: ID 494-649 (Unova)
+  - **Generation 6**: ID 650-721 (Kalos)
+  - **Generation 7**: ID 722-809 (Alola)
+  - **Generation 8**: ID 810-905 (Galar)
+  - **Generation 9**: ID 906-1025 (Paldea)
+</Accordion>
+
+### Behavior
+
+- Validates generation number exists in constants
+- Calculates ID range for the generation
+- Identifies which Pokémon IDs are not yet cached
+- Loads missing Pokémon using `loadMissingPokemon()`
+- Returns immediately if all Pokémon are already loaded
+
+### Example
+
+```javascript
+async ensureGenerationLoaded(genNumber) {
+    if (!this.constants.genRanges[genNumber]) return;
+    const [start, end] = this.constants.genRanges[genNumber];
+    const neededIds = Array.from({ length: end - start + 1 }, (_, i) => start + i).filter(id => !this.pokemonById.has(id));
+    if (neededIds.length > 0) {
+        await this.loadMissingPokemon(neededIds, 'id');
+    }
+}
+```
+
+<Tip>
+Use this method before applying generation filters to ensure complete results.
+</Tip>

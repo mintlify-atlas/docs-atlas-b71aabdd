@@ -1,0 +1,657 @@
+---
+title: Installation
+description: Set up Pokémon Explorer locally for development and customization
+---
+
+# Installation Guide
+
+This guide covers everything you need to set up Pokémon Explorer on your local machine for development, customization, or contribution.
+
+<Info>
+Pokémon Explorer has **zero dependencies**—no npm packages, no build tools, no configuration files. It's pure HTML, CSS, and JavaScript.
+</Info>
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+<CardGroup cols={2}>
+  <Card title="Web Browser" icon="chrome">
+    Modern browser (Chrome, Firefox, Safari, Edge)
+  </Card>
+  <Card title="Text Editor" icon="code">
+    VS Code, Sublime, Atom, or any code editor
+  </Card>
+  <Card title="Git (Optional)" icon="git">
+    For cloning the repository
+  </Card>
+  <Card title="Local Server (Optional)" icon="server">
+    Python, Node.js, or any HTTP server
+  </Card>
+</CardGroup>
+
+<Note>
+No Node.js, npm, or build tools are required. This is intentionally a vanilla JavaScript project.
+</Note>
+
+## Installation Steps
+
+### 1. Clone the Repository
+
+<Steps>
+  <Step title="Clone via HTTPS">
+    ```bash
+    git clone https://github.com/mueses1/PokeApi.git
+    cd PokeApi
+    ```
+  </Step>
+  
+  <Step title="Alternative: Clone via SSH">
+    ```bash
+    git clone git@github.com:mueses1/PokeApi.git
+    cd PokeApi
+    ```
+  </Step>
+  
+  <Step title="Alternative: Download ZIP">
+    1. Visit [https://github.com/mueses1/PokeApi](https://github.com/mueses1/PokeApi)
+    2. Click the green "Code" button
+    3. Select "Download ZIP"
+    4. Extract the ZIP file to your desired location
+  </Step>
+</Steps>
+
+### 2. Project Structure
+
+After cloning, you'll see this structure:
+
+```
+PokeApi/
+├── index.html          # Main HTML file - entry point
+├── styles.css          # Complete styling (1498 lines)
+├── logica.js           # All JavaScript logic (1067+ lines)
+├── Assets/
+│   └── PokeBola.png    # Pokéball favicon
+└── README.md           # Project documentation
+```
+
+<Tip>
+All application code is in just three files: `index.html`, `styles.css`, and `logica.js`. This makes it incredibly easy to understand and modify.
+</Tip>
+
+### 3. Choose Your Development Method
+
+<Tabs>
+  <Tab title="File Protocol">
+    **Simplest Method** (with limitations)
+    
+    ```bash
+    # Just open the file
+    open index.html          # macOS
+    start index.html         # Windows
+    xdg-open index.html      # Linux
+    ```
+    
+    <Warning>
+    Using `file://` protocol may cause issues with:
+    - External resources (fonts, CDN libraries)
+    - CORS policies
+    - Some browser APIs
+    </Warning>
+  </Tab>
+  
+  <Tab title="Python Server">
+    **Recommended for Quick Setup**
+    
+    ```bash
+    # Python 3 (recommended)
+    python3 -m http.server 8000
+    
+    # Python 2
+    python -m SimpleHTTPServer 8000
+    ```
+    
+    Then visit: [http://localhost:8000](http://localhost:8000)
+    
+    <Info>
+    Python is pre-installed on macOS and most Linux distributions.
+    </Info>
+  </Tab>
+  
+  <Tab title="Node.js Server">
+    **If You Have Node.js Installed**
+    
+    ```bash
+    # Using npx (no installation needed)
+    npx http-server -p 8000
+    
+    # Or install globally
+    npm install -g http-server
+    http-server -p 8000
+    
+    # Or use live-server for auto-reload
+    npx live-server --port=8000
+    ```
+    
+    Then visit: [http://localhost:8000](http://localhost:8000)
+  </Tab>
+  
+  <Tab title="VS Code">
+    **Best for Active Development**
+    
+    1. Install [Live Server extension](https://marketplace.visualstudio.com/items?itemName=ritwickdey.LiveServer)
+    2. Open the project folder in VS Code
+    3. Right-click `index.html`
+    4. Select "Open with Live Server"
+    
+    <Tip>
+    Live Server automatically reloads the page when you save changes—perfect for development!
+    </Tip>
+  </Tab>
+</Tabs>
+
+## File Breakdown
+
+### index.html (75 lines)
+
+The main HTML structure with semantic markup:
+
+```html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokédex</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="Assets/PokeBola.png" type="image/x-icon">
+    
+    <!-- Driver.js CDN for interactive tour -->
+    <link rel="stylesheet" href="https://unpkg.com/driver.js/dist/driver.min.css">
+    <script src="https://unpkg.com/driver.js/dist/driver.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Pokémon Explorer</h1>
+            <p class="subtitle">Descubre y explora el mundo Pokémon</p>
+            <button id="startTour" class="tour-button">Guía Interactiva</button>
+        </header>
+        
+        <!-- Controls Section -->
+        <div class="controls">
+            <div class="control-row">
+                <!-- Search Input -->
+                <div class="control-group" id="search-section">
+                    <label for="searchInput">Buscar</label>
+                    <div class="search-input">
+                        <input type="text" id="searchInput" 
+                               placeholder="Ej: pikachu, fuego, rojo...">
+                        <div class="search-suggestions" id="searchSuggestions"></div>
+                    </div>
+                    <div class="error-message" id="searchError"></div>
+                </div>
+                
+                <!-- Type Filter -->
+                <div class="control-group" id="type-filter-section">
+                    <label for="typeFilter">Filtrar por Tipo</label>
+                    <select id="typeFilter">
+                        <option value="">Elige el tipo</option>
+                    </select>
+                </div>
+                
+                <!-- Generation Filter -->
+                <div class="control-group" id="generation-filter-section">
+                    <label for="generationFilter">Generación</label>
+                    <select id="generationFilter">
+                        <option value="">Todas las generaciones</option>
+                        <option value="1">Gen I - Kanto (1-151)</option>
+                        <!-- ... More generations ... -->
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Loading Spinner -->
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+        <p>Cargando Pokémon...</p>
+    </div>
+    
+    <!-- Pokémon Grid -->
+    <div class="pokemon-grid" id="pokemonGrid"></div>
+    
+    <!-- No Results Message -->
+    <div class="no-results" id="noResults" style="display: none;">
+        <div class="no-results-icon">😕</div>
+        <p>No se encontraron Pokémon con los criterios seleccionados</p>
+    </div>
+    
+    <!-- Pagination -->
+    <div class="pagination" id="pagination"></div>
+    
+    <!-- Arcade Pixel Effects -->
+    <div class="arcade-pixels"></div>
+    
+    <script src="logica.js"></script>
+</body>
+</html>
+```
+
+<Note>
+The HTML uses semantic elements and ARIA-friendly structure for accessibility.
+</Note>
+
+### logica.js (1067+ lines)
+
+The complete application logic in a single class:
+
+```javascript
+// Class-based architecture from logica.js:2
+class PokemonExplorer {
+    constructor() {
+        // API Configuration
+        this.API_BASE_URL = 'https://pokeapi.co/api/v2';
+        
+        // Constants for translations and mappings
+        this.constants = {
+            typeTranslations: { /* 18 types */ },
+            abilityTranslations: { /* 70+ abilities */ },
+            colorTranslations: { /* 10 colors */ },
+            habitatTranslations: { /* 9 habitats */ },
+            searchKeywords: { /* Spanish to English mappings */ },
+            typeColors: { /* Gradient backgrounds for each type */ },
+            genRanges: { /* ID ranges for each generation */ }
+        };
+        
+        // Application State
+        Object.assign(this, {
+            currentPage: 1,
+            pokemonPerPage: 12,
+            allPokemon: [],
+            filteredPokemon: [],
+            pokemonTypes: [],
+            pokemonNames: [],
+            searchTimeout: null,
+            pokemonById: new Map(),
+            pokemonByName: new Map(),
+            audioActivated: false
+        });
+        
+        // DOM Element References
+        this.elements = {
+            searchInput: document.getElementById('searchInput'),
+            typeFilter: document.getElementById('typeFilter'),
+            generationFilter: document.getElementById('generationFilter'),
+            loading: document.getElementById('loading'),
+            pokemonGrid: document.getElementById('pokemonGrid'),
+            pagination: document.getElementById('pagination')
+        };
+        
+        // Initialize
+        this.setupEventListeners();
+        this.loadInitialData();
+    }
+    
+    // ... 60+ methods for all functionality
+}
+```
+
+**Key Methods:**
+
+<Accordion title="Data Loading Methods">
+  ```javascript
+  // Load initial types, colors, and habitats
+  async loadInitialData() { ... }
+  
+  // Load Pokémon in batches
+  async loadMissingPokemon(list, key) { ... }
+  
+  // Fetch detailed data for a single Pokémon
+  async fetchPokemonDetails(idOrName) { ... }
+  
+  // Load all Pokémon of a specific type
+  async loadPokemonByType(type) { ... }
+  ```
+</Accordion>
+
+<Accordion title="Search & Filter Methods">
+  ```javascript
+  // Handle search input with debouncing
+  handleSearch(query) { ... }
+  
+  // Parse smart search queries
+  parseSmartSearch(query) { ... }
+  
+  // Apply all active filters
+  async applyFilters() { ... }
+  
+  // Internal filter logic
+  _applyPokemonFilters(pokemonList, criteria) { ... }
+  ```
+</Accordion>
+
+<Accordion title="Display Methods">
+  ```javascript
+  // Display Pokémon cards on current page
+  displayPokemon() { ... }
+  
+  // Create individual Pokémon card
+  createPokemonCard(pokemon) { ... }
+  
+  // Update pagination controls
+  updatePagination() { ... }
+  ```
+</Accordion>
+
+<Accordion title="Utility Methods">
+  ```javascript
+  // Translate keys to Spanish
+  translate(key, translationMap) { ... }
+  
+  // Play Pokémon cry audio
+  playPokemonCry(cryUrl, button) { ... }
+  
+  // Show/hide loading spinner
+  showLoading(show, message) { ... }
+  
+  // Show/hide error messages
+  showError(message) { ... }
+  ```
+</Accordion>
+
+### styles.css (1498 lines)
+
+Complete styling with modern CSS features:
+
+```css
+/* Arcade theme with neon effects - from styles.css:1 */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: #18182a;
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+/* Animated neon borders - styles.css:21 */
+body::before {
+    content: "";
+    position: fixed;
+    height: 6px;
+    background: linear-gradient(90deg, #ff0055 0%, #fff900 50%, #00eaff 100%);
+    filter: blur(1.5px) brightness(1.2);
+    animation: neon-move 3s linear infinite alternate;
+}
+
+/* Glassmorphic Pokémon cards - styles.css:632 */
+.pokemon-card {
+    background: linear-gradient(145deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+    backdrop-filter: blur(20px);
+    border: 2px solid rgba(255,255,255,0.2);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    transition: all 0.3s ease;
+}
+
+.pokemon-card:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+```
+
+**Styling Features:**
+- **Responsive Grid**: 4 columns on desktop, 2-3 on tablet, 1 on mobile
+- **Type Colors**: Each Pokémon type has unique gradient backgrounds
+- **Glassmorphism**: Frosted glass effect with blur and transparency
+- **Arcade Aesthetics**: Neon borders, pixel effects, retro fonts
+- **Animations**: Smooth transitions, hover effects, loading spinners
+
+## Development Workflow
+
+### Making Changes
+
+<Steps>
+  <Step title="Edit Files">
+    Open files in your editor and make changes:
+    - **HTML**: Modify structure in `index.html`
+    - **CSS**: Update styles in `styles.css`
+    - **JavaScript**: Change logic in `logica.js`
+  </Step>
+  
+  <Step title="Save & Reload">
+    - **Manual**: Save files and refresh browser (F5)
+    - **Live Server**: Changes auto-reload
+  </Step>
+  
+  <Step title="Test Changes">
+    - Check in browser DevTools (F12)
+    - Test on different screen sizes
+    - Verify console for errors
+  </Step>
+</Steps>
+
+### Browser DevTools
+
+<CodeGroup>
+```bash Chrome DevTools
+F12 or Cmd+Option+I (Mac) / Ctrl+Shift+I (Windows)
+```
+
+```bash Firefox Developer Tools
+F12 or Cmd+Option+I (Mac) / Ctrl+Shift+I (Windows)
+```
+
+```bash Safari Web Inspector
+Cmd+Option+I (Enable in Preferences → Advanced first)
+```
+</CodeGroup>
+
+<Tip>
+Use the Network tab to monitor PokeAPI requests and the Console tab to debug JavaScript errors.
+</Tip>
+
+## Customization Examples
+
+### Change Pokémon Per Page
+
+```javascript
+// In logica.js:116, change from 12 to your preferred number
+this.pokemonPerPage = 20;  // Show 20 Pokémon per page
+```
+
+### Modify Color Scheme
+
+```css
+/* In styles.css:9, change the background color */
+body {
+    background: #1a1a2e;  /* Change to your preferred dark color */
+}
+
+/* Change neon border colors in styles.css:30 */
+background: linear-gradient(90deg, #your-color-1, #your-color-2, #your-color-3);
+```
+
+### Add Custom Filters
+
+To add a new filter dropdown:
+
+1. **Add HTML** (in `index.html`):
+```html
+<div class="control-group">
+    <label for="customFilter">Your Filter</label>
+    <select id="customFilter">
+        <option value="">All</option>
+    </select>
+</div>
+```
+
+2. **Add to DOM references** (in `logica.js:130`):
+```javascript
+this.elements = {
+    // ... existing elements
+    customFilter: document.getElementById('customFilter')
+};
+```
+
+3. **Add event listener** (in `logica.js:159`):
+```javascript
+this.elements.customFilter.addEventListener('change', () => this.applyFilters());
+```
+
+4. **Implement filter logic** (in `logica.js:531`):
+```javascript
+_applyPokemonFilters(pokemonList, criteria) {
+    return pokemonList.filter(p => {
+        // Add your custom filter condition
+        if (criteria.customFilter && p.yourProperty !== criteria.customFilter) {
+            return false;
+        }
+        // ... existing filters
+        return true;
+    });
+}
+```
+
+## Environment Setup
+
+### Recommended VS Code Extensions
+
+```json
+{
+  "recommendations": [
+    "ritwickdey.liveserver",        // Live Server for auto-reload
+    "esbenp.prettier-vscode",       // Code formatting
+    "dbaeumer.vscode-eslint",       // JavaScript linting
+    "bradlc.vscode-tailwindcss",    // CSS IntelliSense
+    "formulahendry.auto-rename-tag" // Auto rename HTML tags
+  ]
+}
+```
+
+### Git Configuration
+
+Set up Git for contributions:
+
+```bash
+# Configure your identity
+git config user.name "Your Name"
+git config user.email "your.email@example.com"
+
+# Create a new branch for your changes
+git checkout -b feature/your-feature-name
+
+# Make changes, then stage and commit
+git add .
+git commit -m "Add: your feature description"
+
+# Push to your fork
+git push origin feature/your-feature-name
+```
+
+## Troubleshooting
+
+<Accordion title="Pokémon images not loading">
+  **Cause**: Slow network or PokeAPI rate limiting
+  
+  **Solution**: 
+  - Check browser console for 429 errors
+  - Wait a moment and refresh
+  - Images use lazy loading, so they load as you scroll
+</Accordion>
+
+<Accordion title="Search suggestions not appearing">
+  **Cause**: JavaScript error or DOM not ready
+  
+  **Solution**:
+  - Check browser console for errors
+  - Ensure `logica.js` is loading after DOM elements
+  - Verify the `searchSuggestions` element exists
+</Accordion>
+
+<Accordion title="Audio not playing">
+  **Cause**: Browser autoplay policies
+  
+  **Solution**:
+  - Click the 🔊 button once to activate audio
+  - Check browser console for audio errors
+  - Ensure PokeAPI cry URLs are accessible
+</Accordion>
+
+<Accordion title="Styles not applying">
+  **Cause**: CSS file path or cache issues
+  
+  **Solution**:
+  - Verify `styles.css` is in the same directory as `index.html`
+  - Hard refresh: Ctrl+Shift+R (Windows) or Cmd+Shift+R (Mac)
+  - Check Network tab in DevTools to confirm CSS loaded
+</Accordion>
+
+<Accordion title="Cannot start local server">
+  **Cause**: Port already in use or command not found
+  
+  **Solution**:
+  ```bash
+  # Try a different port
+  python3 -m http.server 3000
+  
+  # Or find what's using port 8000
+  # macOS/Linux:
+  lsof -i :8000
+  
+  # Windows:
+  netstat -ano | findstr :8000
+  ```
+</Accordion>
+
+## Performance Optimization
+
+<CardGroup cols={2}>
+  <Card title="Image Optimization" icon="image">
+    Images use `loading="lazy"` attribute for better performance
+  </Card>
+  <Card title="Debounced Search" icon="magnifying-glass">
+    300ms delay prevents excessive API calls while typing
+  </Card>
+  <Card title="Map Data Structures" icon="map">
+    Uses `Map()` for O(1) Pokémon lookups by ID and name
+  </Card>
+  <Card title="Batch API Calls" icon="layer-group">
+    Loads Pokémon in batches of 50 using `Promise.all()`
+  </Card>
+</CardGroup>
+
+```javascript
+// Debounced search from logica.js:367
+this.searchTimeout = setTimeout(() => this.performSearch(query), 300);
+
+// Batch loading from logica.js:281
+const batchSize = 50;
+for (let i = 0; i < needed.length; i += batchSize) {
+    const batch = needed.slice(i, i + batchSize);
+    const newPokemon = await Promise.all(
+        batch.map(p => this.fetchPokemonDetails(p))
+    );
+}
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Explore Features" icon="compass" href="/quickstart">
+    Learn how to use all the interactive features
+  </Card>
+  <Card title="Contribute" icon="code-branch">
+    Fork the repo and submit pull requests on GitHub
+  </Card>
+</CardGroup>
+
+<Note>
+Ready to contribute? Check the [GitHub repository](https://github.com/mueses1/PokeApi) for open issues and contribution guidelines.
+</Note>

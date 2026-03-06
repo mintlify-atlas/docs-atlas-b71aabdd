@@ -1,0 +1,296 @@
+---
+title: 'Search Methods'
+description: 'Methods for searching and filtering Pokémon by name and smart criteria'
+---
+
+## handleSearch()
+
+Handles user input in the search field and triggers the search process with debouncing.
+
+<ParamField path="query" type="string" required>
+  The search query entered by the user
+</ParamField>
+
+### Behavior
+
+- Clears any existing search timeout to debounce rapid input
+- If the query is empty, hides suggestions and applies filters to show all Pokémon
+- Requires at least 2 characters to perform a search
+- Debounces search execution by 300ms
+- Updates search suggestions as the user types
+
+### Example
+
+```javascript
+handleSearch(query) {
+    clearTimeout(this.searchTimeout);
+    this.clearError();
+
+    if (!query.trim()) {
+        this.hideSuggestions();
+        this.applyFilters();
+        return;
+    }
+
+    if (query.length < 2) {
+        this.showError('Ingresa al menos 2 caracteres');
+        return;
+    }
+
+    this.searchTimeout = setTimeout(() => this.performSearch(query), 300);
+    this.updateSuggestions(query);
+}
+```
+
+---
+
+## performSearch()
+
+Executes the search operation based on the query, determining whether to use smart search or name search.
+
+<ParamField path="query" type="string" required>
+  The search query to process
+</ParamField>
+
+### Behavior
+
+- Shows loading indicator during search
+- Parses the query using `parseSmartSearch()` to identify search criteria
+- If smart criteria are detected (type, color, habitat, size, weight), performs a smart search
+- Otherwise, performs a name-based search
+- Handles errors by displaying an error message and clearing results
+- Always hides loading indicator when complete
+
+### Example
+
+```javascript
+async performSearch(query) {
+    if (!query.trim()) { this.applyFilters(); return; }
+    this.showLoading(true);
+
+    try {
+        const criteria = this.parseSmartSearch(query);
+        if (criteria.type || criteria.color || criteria.habitat || criteria.size || criteria.weight) {
+            await this.performSmartSearch(criteria);
+        } else {
+            await this.performNameSearch(criteria.name || query);
+        }
+    } catch (error) {
+        this.showError('Error al buscar');
+        this.filteredPokemon = [];
+        this.displayPokemon();
+        this.updatePagination();
+    } finally {
+        this.showLoading(false);
+    }
+}
+```
+
+---
+
+## performNameSearch()
+
+Searches for Pokémon by name, supporting partial matches.
+
+<ParamField path="query" type="string" required>
+  The name or partial name to search for
+</ParamField>
+
+### Behavior
+
+- Converts query to lowercase for case-insensitive matching
+- Searches through cached Pokémon first
+- If no results found, attempts to fetch from API using exact name
+- Sorts results by Pokémon ID
+- Resets pagination to page 1
+- Displays appropriate error messages if no Pokémon found
+- Updates display and pagination
+
+### Example
+
+```javascript
+async performNameSearch(query) {
+    const lowerQuery = query.toLowerCase();
+    let found = [...this.pokemonByName.values()].filter(p => p.name.includes(lowerQuery));
+
+    if (!found.length && query.trim()) {
+        const pokemon = await this.fetchPokemonDetails(lowerQuery);
+        if (pokemon) {
+            this.allPokemon.sort((a, b) => a.id - b.id);
+            found = [pokemon];
+        }
+    }
+
+    this.filteredPokemon = found;
+    this.currentPage = 1;
+
+    if (found.length) {
+        this.clearError();
+    } else {
+        this.showError(query.trim() ? 'Pokémon no encontrado' : 'Ingresa un término de búsqueda');
+    }
+    this.displayPokemon();
+    this.updatePagination();
+}
+```
+
+---
+
+## performSmartSearch()
+
+Executes a multi-criteria search using parsed search criteria.
+
+<ParamField path="criteria" type="object" required>
+  Object containing search criteria including:
+  - `name`: string - Pokémon name
+  - `type`: string - Pokémon type (fire, water, etc.)
+  - `color`: string - Pokémon color
+  - `habitat`: string - Pokémon habitat
+  - `size`: string - Size category (tiny, small, medium, large, huge)
+  - `weight`: string - Weight category (light, normal, heavy, massive)
+</ParamField>
+
+### Behavior
+
+- Loads Pokémon by type if type criterion is specified
+- Applies all criteria filters to the complete Pokémon list
+- Resets pagination to page 1
+- Shows error if no results match criteria
+- Updates display and pagination
+
+### Example
+
+```javascript
+async performSmartSearch(criteria) {
+    if (criteria.type) {
+        await this.loadPokemonByType(criteria.type);
+    }
+
+    const results = this._applyPokemonFilters([...this.pokemonById.values()], criteria);
+
+    this.filteredPokemon = results;
+    this.currentPage = 1;
+
+    if (results.length) {
+        this.clearError();
+    } else {
+        this.showError('No se encontraron Pokémon con esos criterios');
+    }
+    this.displayPokemon();
+    this.updatePagination();
+}
+```
+
+---
+
+## parseSmartSearch()
+
+Parses a search query to identify and extract multiple search criteria.
+
+<ParamField path="query" type="string" required>
+  The raw search query to parse
+</ParamField>
+
+<ResponseField name="criteria" type="object">
+  Object containing extracted criteria:
+  <ResponseField name="name" type="string">
+    Remaining words after extracting keywords
+  </ResponseField>
+  <ResponseField name="type" type="string | null">
+    Detected Pokémon type
+  </ResponseField>
+  <ResponseField name="color" type="string | null">
+    Detected color
+  </ResponseField>
+  <ResponseField name="habitat" type="string | null">
+    Detected habitat
+  </ResponseField>
+  <ResponseField name="size" type="string | null">
+    Detected size category
+  </ResponseField>
+  <ResponseField name="weight" type="string | null">
+    Detected weight category
+  </ResponseField>
+</ResponseField>
+
+### Behavior
+
+- Splits query into individual words
+- Translates Spanish keywords to English API values using `searchKeywords` map
+- Categorizes keywords into types, colors, habitats, sizes, and weights
+- Remaining unmatched words become the name search term
+- Returns structured criteria object
+
+### Example
+
+```javascript
+parseSmartSearch(query) {
+    const criteria = { name: '', type: null, color: null, habitat: null, size: null, weight: null };
+    const words = query.toLowerCase().trim().split(/\s+/);
+    const remainingWords = [];
+
+    const categoryMap = {
+        types: Object.values(this.constants.searchKeywords),
+        colors: Object.values(this.constants.searchKeywords),
+        habitats: Object.values(this.constants.searchKeywords),
+        sizes: ['tiny', 'small', 'medium', 'large', 'huge'],
+        weights: ['light', 'heavy', 'massive']
+    };
+
+    for (const word of words) {
+        const keyword = this.constants.searchKeywords[word];
+        if (keyword) {
+            if (categoryMap.types.includes(keyword)) criteria.type = keyword;
+            else if (categoryMap.colors.includes(keyword)) criteria.color = keyword;
+            else if (categoryMap.habitats.includes(keyword)) criteria.habitat = keyword;
+            else if (categoryMap.sizes.includes(keyword)) criteria.size = keyword;
+            else if (categoryMap.weights.includes(keyword)) criteria.weight = keyword;
+        } else {
+            remainingWords.push(word);
+        }
+    }
+
+    criteria.name = remainingWords.join(' ');
+    return criteria;
+}
+```
+
+---
+
+## updateSuggestions()
+
+Generates and displays search suggestions based on the current query.
+
+<ParamField path="query" type="string" required>
+  The current search query
+</ParamField>
+
+### Behavior
+
+- Matches Pokémon names containing the query (up to 3 matches)
+- Matches search keywords from translations (up to 2 matches)
+- Combines and limits results to maximum 5 suggestions
+- Only shows suggestions if query is at least 2 characters
+- Displays suggestions using `displaySuggestions()` method
+
+### Example
+
+```javascript
+updateSuggestions(query) {
+    const lowerQuery = query.toLowerCase();
+    const nameMatches = this.pokemonNames.filter(name => name.toLowerCase().includes(lowerQuery)).slice(0, 3);
+    const keywordMatches = Object.keys(this.constants.searchKeywords).filter(keyword => keyword.includes(lowerQuery)).slice(0, 2);
+    const suggestions = [...nameMatches, ...keywordMatches].slice(0, 5);
+
+    if (suggestions.length > 0 && query.length >= 2) {
+        this.displaySuggestions(suggestions);
+        this.showSuggestions();
+    } else {
+        this.hideSuggestions();
+    }
+}
+```
+
+<Note>
+Suggestions are displayed as clickable items that trigger a full search when selected.
+</Note>

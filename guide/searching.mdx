@@ -1,0 +1,190 @@
+---
+title: Searching for Pokémon
+description: Learn how to search for Pokémon by name, type, color, and more using the intelligent search system
+---
+
+Pokémon Explorer features a powerful smart search system that allows you to find Pokémon using multiple criteria. Whether you're looking for a specific Pokémon by name or searching by characteristics like type and color, the search bar has you covered.
+
+## How to Search
+
+<Steps>
+  <Step title="Open the Search Bar">
+    Navigate to the search section at the top of the page. The search input field is labeled with a magnifying glass icon (🔍).
+  </Step>
+  
+  <Step title="Enter Your Search Query">
+    Type at least 2 characters to begin searching. The system will provide real-time suggestions as you type.
+  </Step>
+  
+  <Step title="View Suggestions">
+    As you type, a dropdown menu will appear showing:
+    - Matching Pokémon names (up to 3)
+    - Related keywords like types, colors, and habitats (up to 2)
+    
+    Click any suggestion to quickly select it.
+  </Step>
+  
+  <Step title="Press Enter or Wait">
+    The search executes automatically after a brief pause, or you can press Enter to search immediately.
+  </Step>
+</Steps>
+
+## Search by Name
+
+The simplest way to find a Pokémon is by searching for its name.
+
+<Tip>
+  You can type partial names! Searching for "pika" will find Pikachu, Pikachu-raichu forms, and more.
+</Tip>
+
+**Examples:**
+- `pikachu` - Finds Pikachu
+- `char` - Finds Charmander, Charmeleon, Charizard
+- `bulba` - Finds Bulbasaur and its evolutions
+
+## Search by Type
+
+Search for Pokémon by their elemental type using Spanish or English keywords.
+
+**Supported Types:**
+- Fire (Fuego)
+- Water (Agua)
+- Grass (Planta)
+- Electric (Eléctrico)
+- Ice (Hielo)
+- Fighting (Lucha)
+- Poison (Veneno)
+- Ground (Tierra)
+- Flying (Volador)
+- Psychic (Psíquico)
+- Bug (Bicho)
+- Rock (Roca)
+- Ghost (Fantasma)
+- Dragon (Dragón)
+- Dark (Siniestro)
+- Steel (Acero)
+- Fairy (Hada)
+- Normal
+
+**Examples:**
+- `fuego` - Shows all Fire-type Pokémon
+- `water` - Shows all Water-type Pokémon
+- `dragon` - Shows all Dragon-type Pokémon
+
+## Search by Color
+
+Find Pokémon based on their primary color classification.
+
+**Available Colors:**
+- Black (Negro)
+- Blue (Azul)
+- Brown (Marrón)
+- Gray (Gris)
+- Green (Verde)
+- Pink (Rosa)
+- Purple (Morado)
+- Red (Rojo)
+- White (Blanco)
+- Yellow (Amarillo)
+
+**Examples:**
+- `rojo` - Shows all red Pokémon
+- `yellow` - Shows all yellow Pokémon
+- `verde` - Shows all green Pokémon
+
+## Search by Habitat
+
+Discover Pokémon that live in specific environments.
+
+**Available Habitats:**
+- Cave (Cueva)
+- Forest (Bosque)
+- Grassland (Pradera)
+- Mountain (Montaña)
+- Rare (Raro)
+- Rough Terrain (Terreno Áspero)
+- Sea (Mar)
+- Urban (Urbano)
+- Waters Edge (Orilla del Agua)
+
+**Examples:**
+- `bosque` - Shows forest-dwelling Pokémon
+- `sea` - Shows sea-dwelling Pokémon
+- `mountain` - Shows mountain Pokémon
+
+## Search by Size
+
+Filter Pokémon based on their height.
+
+**Size Categories:**
+- **Tiny** (Muy pequeño): Less than 0.5m
+- **Small** (Pequeño): 0.5m to 1m
+- **Medium** (Mediano): 1m to 2m
+- **Large** (Grande): 2m to 3m
+- **Huge** (Enorme/Gigante): Over 3m
+
+**Examples:**
+- `pequeño` - Shows small Pokémon
+- `huge` - Shows huge Pokémon
+
+## Search by Weight
+
+Find Pokémon based on their weight class.
+
+**Weight Categories:**
+- **Light** (Ligero): Less than 10kg
+- **Heavy** (Pesado): 50kg to 100kg
+- **Massive** (Masivo): Over 100kg
+
+**Examples:**
+- `ligero` - Shows lightweight Pokémon
+- `massive` - Shows the heaviest Pokémon
+
+## Smart Combined Search
+
+<Info>
+  The search system automatically recognizes multiple criteria in a single query!
+</Info>
+
+You can combine different search terms to narrow down results:
+
+**Examples:**
+- `fuego rojo` - Fire-type AND red Pokémon
+- `planta verde` - Grass-type AND green Pokémon
+- `water blue` - Water-type AND blue Pokémon
+- `dragon grande` - Dragon-type AND large Pokémon
+
+<Note>
+  When you combine criteria, the search uses AND logic - Pokémon must match ALL specified criteria to appear in results.
+</Note>
+
+## Search Tips
+
+<Accordion title="No results found?">
+  - Check your spelling
+  - Try using fewer search terms
+  - Use the dropdown filters instead for more precise control
+  - Remember: Combined searches require Pokémon to match ALL criteria
+</Accordion>
+
+<Accordion title="Search is too slow?">
+  - The first search for a new type loads all Pokémon of that type from the API
+  - Subsequent searches for the same type will be much faster due to caching
+  - Name searches are always fast as they use the local index
+</Accordion>
+
+<Accordion title="Can I search in English and Spanish?">
+  Yes! The search system supports keywords in both languages. You can use "fuego" or "fire", "rojo" or "red", etc.
+</Accordion>
+
+## Clear Search
+
+To reset your search and view all Pokémon again:
+
+1. Clear the search input field
+2. Or click the reset filters button in the filters section
+3. The Pokédex will return to showing all Pokémon
+
+<Tip>
+  Use the search suggestions feature! It helps you discover what keywords are available and prevents typos.
+</Tip>

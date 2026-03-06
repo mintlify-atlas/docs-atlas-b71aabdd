@@ -1,0 +1,395 @@
+---
+title: 'Data Methods'
+description: 'Methods for loading, fetching, and displaying Pokémon data'
+---
+
+## loadPokemon()
+
+Initializes the Pokémon list by loading the complete list of Pokémon names and the first batch of detailed data.
+
+### Behavior
+
+- Shows loading indicator
+- Fetches complete list of Pokémon names from PokéAPI (up to 1302 Pokémon)
+- Stores names in `pokemonNames` array for search suggestions
+- Loads detailed data for the first 24 Pokémon by ID
+- Handles errors by displaying error message
+- Hides loading indicator when complete
+
+### Example
+
+```javascript
+async loadPokemon() {
+    this.showLoading(true);
+    try {
+        const response = await fetch(`${this.API_BASE_URL}/pokemon?limit=1302`);
+        this.pokemonNames = (await response.json()).results.map(p => p.name);
+        await this.loadMissingPokemon([...Array(24).keys()].map(i => i + 1), 'id');
+    } catch (error) {
+        console.error('Error al cargar Pokémon:', error);
+        this.showError('Error al cargar los Pokémon');
+    } finally {
+        this.showLoading(false);
+    }
+}
+```
+
+<Note>
+This method is called during application initialization to populate the initial view.
+</Note>
+
+---
+
+## loadMissingPokemon()
+
+Loads detailed data for Pokémon that aren't already cached, with batch processing for performance.
+
+<ParamField path="list" type="array" required>
+  Array of Pokémon identifiers (IDs or names)
+</ParamField>
+
+<ParamField path="key" type="string" default="name">
+  Identifier type: "id" for numeric IDs, "name" for string names
+</ParamField>
+
+### Behavior
+
+- Filters list to only include Pokémon not already in cache
+- Processes in batches of 50 for optimal performance
+- Shows loading progress for large batches (> 20 Pokémon)
+- Fetches details using `fetchPokemonDetails()` for each item
+- Adds valid Pokémon to cache using `addPokemon()`
+- Updates `filteredPokemon` to match `allPokemon`
+- Clears any error messages
+- Updates display and pagination when complete
+
+### Example
+
+```javascript
+async loadMissingPokemon(list, key = 'name') {
+    const needed = list.filter(p => key === 'id' ? !this.pokemonById.has(p) : !this.pokemonByName.has(p));
+    if (needed.length === 0) return;
+
+    const batchSize = 50;
+    for (let i = 0; i < needed.length; i += batchSize) {
+        const batch = needed.slice(i, i + batchSize);
+        if (needed.length > 20) {
+            this.showLoading(true, `Cargando ${needed.length} Pokémon...`);
+        }
+        const newPokemon = await Promise.all(batch.map(p => this.fetchPokemonDetails(key === 'id' ? p : p.name)));
+        newPokemon.forEach(p => p && this.addPokemon(p));
+    }
+
+    this.filteredPokemon = [...this.allPokemon];
+    this.clearError();
+    this.displayPokemon();
+    this.updatePagination();
+}
+```
+
+<Tip>
+Batch processing prevents API rate limiting and improves performance for large datasets.
+</Tip>
+
+---
+
+## fetchPokemonDetails()
+
+Fetches detailed information for a single Pokémon from the PokéAPI.
+
+<ParamField path="idOrName" type="number | string" required>
+  Pokémon ID (number) or name (string)
+</ParamField>
+
+<ResponseField name="return" type="object | null">
+  Pokémon object with complete details, or null if not found
+  <ResponseField name="id" type="number">
+    Pokémon ID
+  </ResponseField>
+  <ResponseField name="name" type="string">
+    Pokémon name
+  </ResponseField>
+  <ResponseField name="image" type="string">
+    URL to official artwork image
+  </ResponseField>
+  <ResponseField name="types" type="array">
+    Array of type names (e.g., ["fire", "flying"])
+  </ResponseField>
+  <ResponseField name="abilities" type="array">
+    Array of ability names
+  </ResponseField>
+  <ResponseField name="stats" type="object">
+    Base stats object containing hp, attack, defense, and speed
+  </ResponseField>
+  <ResponseField name="height" type="number">
+    Height in meters
+  </ResponseField>
+  <ResponseField name="weight" type="number">
+    Weight in kilograms
+  </ResponseField>
+  <ResponseField name="baseExperience" type="number">
+    Base experience points
+  </ResponseField>
+  <ResponseField name="cry" type="string | null">
+    URL to Pokémon cry audio file
+  </ResponseField>
+  <ResponseField name="color" type="string | null">
+    Pokémon color from species data
+  </ResponseField>
+  <ResponseField name="habitat" type="string | null">
+    Pokémon habitat from species data
+  </ResponseField>
+</ResponseField>
+
+### Behavior
+
+- Checks cache first (by ID or name) to avoid redundant API calls
+- Fetches basic Pokémon data from `/pokemon/{idOrName}` endpoint
+- Fetches species data for color and habitat information
+- Extracts official artwork from sprites
+- Converts height (decimeters to meters) and weight (hectograms to kilograms)
+- Adds Pokémon to cache automatically
+- Returns null if Pokémon not found or error occurs
+
+### Example
+
+```javascript
+async fetchPokemonDetails(idOrName) {
+    const cached = typeof idOrName === 'number' ? this.pokemonById.get(idOrName) : this.pokemonByName.get(idOrName.toLowerCase());
+    if (cached) return cached;
+
+    try {
+        const response = await fetch(`${this.API_BASE_URL}/pokemon/${idOrName}`);
+        if (!response.ok) return null;
+        const pokemon = await response.json();
+
+        let speciesData = null;
+        if (pokemon.species && pokemon.species.url) {
+            const speciesResponse = await fetch(pokemon.species.url);
+            if (speciesResponse.ok) {
+                speciesData = await speciesResponse.json();
+            }
+        }
+
+        const pokeObj = {
+            id: pokemon.id,
+            name: pokemon.name,
+            image: pokemon.sprites.other['official-artwork']?.front_default || pokemon.sprites.front_default,
+            types: pokemon.types.map(t => t.type.name),
+            abilities: pokemon.abilities.map(a => a.ability.name),
+            stats: {
+                hp: pokemon.stats[0].base_stat,
+                attack: pokemon.stats[1].base_stat,
+                defense: pokemon.stats[2].base_stat,
+                speed: pokemon.stats[5].base_stat
+            },
+            height: pokemon.height / 10,
+            weight: pokemon.weight / 10,
+            baseExperience: pokemon.base_experience || 0,
+            cry: pokemon.cries?.latest || pokemon.cries?.legacy || null,
+            color: speciesData?.color?.name || null,
+            habitat: speciesData?.habitat?.name || null
+        };
+        this.addPokemon(pokeObj);
+        return pokeObj;
+    } catch (error) {
+        console.error(`Error al obtener el Pokémon ${idOrName}:`, error);
+        return null;
+    }
+}
+```
+
+---
+
+## addPokemon()
+
+Adds a Pokémon to the internal data structures if not already present.
+
+<ParamField path="pokemon" type="object" required>
+  Pokémon object with at least `id` and `name` properties
+</ParamField>
+
+### Behavior
+
+- Checks if Pokémon already exists in `pokemonById` map
+- If new, adds to:
+  - `allPokemon` array
+  - `pokemonById` map (keyed by ID)
+  - `pokemonByName` map (keyed by lowercase name)
+- Prevents duplicate entries
+
+### Example
+
+```javascript
+addPokemon(pokemon) {
+    if (!this.pokemonById.has(pokemon.id)) {
+        this.allPokemon.push(pokemon);
+        this.pokemonById.set(pokemon.id, pokemon);
+        this.pokemonByName.set(pokemon.name, pokemon);
+    }
+}
+```
+
+<Note>
+This method maintains referential integrity across all three data structures.
+</Note>
+
+---
+
+## displayPokemon()
+
+Renders the current page of Pokémon cards to the grid.
+
+### Behavior
+
+- Calculates start index based on `currentPage` and `pokemonPerPage`
+- Slices `filteredPokemon` array to get current page items
+- Shows/hides grid and "no results" message based on results
+- Clears existing grid content
+- Creates cards using `createPokemonCard()` for each Pokémon
+- Applies staggered animation delays (0.1s per card)
+- Appends cards to the grid
+
+### Example
+
+```javascript
+displayPokemon() {
+    const { pokemonGrid, noResults } = this.elements;
+    const startIndex = (this.currentPage - 1) * this.pokemonPerPage;
+    const pokemonToShow = this.filteredPokemon.slice(startIndex, startIndex + this.pokemonPerPage);
+
+    pokemonGrid.style.display = pokemonToShow.length ? 'grid' : 'none';
+    noResults.style.display = pokemonToShow.length ? 'none' : 'block';
+    pokemonGrid.innerHTML = '';
+
+    pokemonToShow.forEach((pokemon, index) => {
+        const card = this.createPokemonCard(pokemon);
+        card.style.animationDelay = `${index * 0.1}s`;
+        pokemonGrid.appendChild(card);
+    });
+}
+```
+
+---
+
+## createPokemonCard()
+
+Creates a complete interactive card element for a Pokémon.
+
+<ParamField path="pokemon" type="object" required>
+  Pokémon object with all details
+</ParamField>
+
+<ResponseField name="return" type="HTMLElement">
+  DOM element representing the Pokémon card
+</ResponseField>
+
+### Card Features
+
+- **Image**: Official artwork with lazy loading and error handling
+- **Name and ID**: Displayed prominently with formatted ID (e.g., #001)
+- **Type Badges**: Colored badges for each type
+- **Toggle Button**: Expands to show additional details
+- **Cry Button**: Plays Pokémon audio (if available)
+- **Details Section**: Height, weight, experience, color, habitat
+- **Abilities**: List of abilities with translations
+- **Stats**: HP, Attack, Defense, Speed displayed as stat bars
+- **Background Gradient**: Based on primary type
+
+### Example
+
+```javascript
+createPokemonCard(pokemon) {
+    const card = document.createElement('div');
+    card.className = 'pokemon-card';
+    const backgroundGradient = this.constants.typeColors[pokemon.types[0]] || 'linear-gradient(135deg, #667eea, #764ba2)';
+
+    const detailsHtml = `
+        <div class="pokemon-details">
+            <div class="pokemon-info-row"><span>Altura:</span><span>${pokemon.height}m</span></div>
+            <div class="pokemon-info-row"><span>Peso:</span><span>${pokemon.weight}kg</span></div>
+            <div class="pokemon-info-row"><span>Experiencia:</span><span>${pokemon.baseExperience} XP</span></div>
+            ${pokemon.color ? `<div class="pokemon-info-row"><span>Color:</span><span>${this.translate(pokemon.color, 'colorTranslations')}</span></div>` : '<div class="pokemon-info-row"><span>Color:</span><span>No disponible</span></div>'}
+            ${pokemon.habitat ? `<div class="pokemon-info-row"><span>Hábitat:</span><span>${this.translate(pokemon.habitat, 'habitatTranslations')}</span></div>` : '<div class="pokemon-info-row"><span>Hábitat:</span><span>No disponible</span></div>'}
+            <div class="abilities-section">
+                <div class="pokemon-info-label">Habilidades:</div>
+                <div class="abilities-list">${pokemon.abilities.slice(0, 3).map(ability => `<span class="ability-badge">${this.translate(ability, 'abilityTranslations')}</span>`).join('')}</div>
+            </div>
+        </div>`;
+
+    const statsHtml = `
+        <div class="pokemon-stats">
+            ${[['❤️ HP', pokemon.stats.hp], ['⚔️ Ataque', pokemon.stats.attack], ['🛡️ Defensa', pokemon.stats.defense], ['⚡ Velocidad', pokemon.stats.speed]]
+            .map(([name, value]) => `<div class="stat-item"><div class="stat-name">${name}</div><div class="stat-value">${value}</div></div>`).join('')}
+        </div>`;
+
+    card.innerHTML = `
+        <div class="pokemon-card-content">
+            <div class="pokemon-image">
+                <div class="image-placeholder"><div class="loading-spinner"></div></div>
+                <img src="${pokemon.image}" alt="${pokemon.name}" loading="lazy">
+                ${pokemon.cry ? `<button class="cry-button" title="Clic para activar audio">🔊</button>` : ''}
+            </div>
+            <div class="pokemon-name">${pokemon.name}</div>
+            <div class="pokemon-id">#${String(pokemon.id).padStart(3, '0')}</div>
+            <div class="pokemon-types">${pokemon.types.map(type => `<span class="type-badge type-${type}">${this.translate(type, 'typeTranslations')}</span>`).join('')}</div>
+            <button class="toggle-info">Ver más</button>
+            <div class="extra-info" style="display: none;">
+                ${detailsHtml}
+                ${statsHtml}
+            </div>
+        </div>`;
+
+    // Event listeners for cry button and toggle
+    if (pokemon.cry) {
+        const cryButton = card.querySelector('.cry-button');
+        cryButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.playPokemonCry(pokemon.cry, cryButton);
+            this.audioActivated = true;
+        });
+    }
+
+    card.style.setProperty('--card-gradient', backgroundGradient);
+    card.style.background = backgroundGradient;
+
+    const toggleBtn = card.querySelector('.toggle-info');
+    const extraInfo = card.querySelector('.extra-info');
+    toggleBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const isOpen = card.classList.toggle('open');
+        toggleBtn.textContent = isOpen ? 'Ver menos' : 'Ver más';
+        extraInfo.style.display = isOpen ? 'block' : 'none';
+    });
+
+    return card;
+}
+```
+
+<Tabs>
+  <Tab title="Card Structure">
+    - Outer container with gradient background
+    - Image section with lazy loading
+    - Name and ID display
+    - Type badges
+    - Expandable details section
+    - Interactive buttons
+  </Tab>
+  <Tab title="Interactivity">
+    - Toggle button expands/collapses details
+    - Cry button plays Pokémon sound
+    - Smooth animations on load
+    - Hover effects on buttons
+  </Tab>
+  <Tab title="Styling">
+    - Dynamic gradient based on type
+    - Responsive card layout
+    - Staggered animation delays
+    - Type-specific colors
+  </Tab>
+</Tabs>
+
+<Warning>
+The card HTML includes inline event handlers that require proper cleanup if cards are frequently recreated.
+</Warning>

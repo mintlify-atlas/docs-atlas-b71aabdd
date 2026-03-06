@@ -1,0 +1,471 @@
+---
+title: "PokemonExplorer"
+description: "Main application class that manages the Pokédex functionality"
+---
+
+## Overview
+
+The `PokemonExplorer` class is the core of the Pokémon Explorer application. It handles data fetching, search, filtering, pagination, and UI rendering for browsing over 1,300 Pokémon.
+
+## Constructor
+
+```javascript
+const explorer = new PokemonExplorer();
+```
+
+Initializes the application with:
+- API configuration
+- Translation constants
+- State management
+- DOM element references
+- Event listeners
+- Initial data loading
+
+## Properties
+
+### API Configuration
+
+<ParamField path="API_BASE_URL" type="string" default="https://pokeapi.co/api/v2">
+  Base URL for the PokéAPI endpoints
+</ParamField>
+
+### Constants
+
+<ParamField path="constants" type="object">
+  Configuration object containing translation maps and settings
+  
+  <Expandable title="constants properties">
+    <ResponseField name="typeTranslations" type="object">
+      Maps English type names to Spanish (e.g., `fire` → `Fuego`)
+    </ResponseField>
+    
+    <ResponseField name="abilityTranslations" type="object">
+      Maps English ability names to Spanish
+    </ResponseField>
+    
+    <ResponseField name="colorTranslations" type="object">
+      Maps color names to Spanish (e.g., `red` → `Rojo`)
+    </ResponseField>
+    
+    <ResponseField name="habitatTranslations" type="object">
+      Maps habitat names to Spanish (e.g., `forest` → `Bosque`)
+    </ResponseField>
+    
+    <ResponseField name="searchKeywords" type="object">
+      Maps Spanish search terms to English API values
+    </ResponseField>
+    
+    <ResponseField name="typeColors" type="object">
+      CSS gradients for each Pokémon type
+    </ResponseField>
+    
+    <ResponseField name="genRanges" type="object">
+      ID ranges for each generation (1-9), e.g., `{ '1': [1, 151] }`
+    </ResponseField>
+  </Expandable>
+</ParamField>
+
+### State Properties
+
+<ParamField path="currentPage" type="number" default="1">
+  Current pagination page number
+</ParamField>
+
+<ParamField path="pokemonPerPage" type="number" default="12">
+  Number of Pokémon displayed per page
+</ParamField>
+
+<ParamField path="allPokemon" type="Array<Pokemon>">
+  Complete list of loaded Pokémon objects
+</ParamField>
+
+<ParamField path="filteredPokemon" type="Array<Pokemon>">
+  Pokémon list after applying search/filters
+</ParamField>
+
+<ParamField path="pokemonById" type="Map<number, Pokemon>">
+  Fast lookup map for Pokémon by ID
+</ParamField>
+
+<ParamField path="pokemonByName" type="Map<string, Pokemon>">
+  Fast lookup map for Pokémon by name
+</ParamField>
+
+<ParamField path="audioActivated" type="boolean" default="false">
+  Whether user has activated audio playback
+</ParamField>
+
+### DOM Elements
+
+<ParamField path="elements" type="object">
+  References to key DOM elements
+  
+  <Expandable title="elements properties">
+    <ResponseField name="searchInput" type="HTMLElement">
+      Search input field
+    </ResponseField>
+    <ResponseField name="searchSuggestions" type="HTMLElement">
+      Suggestions dropdown container
+    </ResponseField>
+    <ResponseField name="searchError" type="HTMLElement">
+      Error message display
+    </ResponseField>
+    <ResponseField name="typeFilter" type="HTMLSelectElement">
+      Type filter dropdown
+    </ResponseField>
+    <ResponseField name="generationFilter" type="HTMLSelectElement">
+      Generation filter dropdown
+    </ResponseField>
+    <ResponseField name="colorFilter" type="HTMLSelectElement">
+      Color filter dropdown
+    </ResponseField>
+    <ResponseField name="habitatFilter" type="HTMLSelectElement">
+      Habitat filter dropdown
+    </ResponseField>
+    <ResponseField name="sizeFilter" type="HTMLSelectElement">
+      Size filter dropdown
+    </ResponseField>
+    <ResponseField name="weightFilter" type="HTMLSelectElement">
+      Weight filter dropdown
+    </ResponseField>
+    <ResponseField name="loading" type="HTMLElement">
+      Loading indicator
+    </ResponseField>
+    <ResponseField name="pokemonGrid" type="HTMLElement">
+      Grid container for Pokémon cards
+    </ResponseField>
+    <ResponseField name="noResults" type="HTMLElement">
+      No results message
+    </ResponseField>
+    <ResponseField name="pagination" type="HTMLElement">
+      Pagination controls container
+    </ResponseField>
+  </Expandable>
+</ParamField>
+
+## Core Methods
+
+### Data Loading
+
+<Accordion title="loadInitialData()">
+  ```javascript
+  async loadInitialData()
+  ```
+  
+  Loads initial data required for the application:
+  - Pokémon types
+  - Color options
+  - Habitat options
+  - Populates filter dropdowns
+  - Triggers initial Pokémon load
+  
+  **Returns:** `Promise<void>`
+</Accordion>
+
+<Accordion title="loadPokemon()">
+  ```javascript
+  async loadPokemon()
+  ```
+  
+  Loads the complete list of Pokémon names from the API (up to 1,302 Pokémon), then loads the first 24 Pokémon details for display.
+  
+  **Returns:** `Promise<void>`
+</Accordion>
+
+<Accordion title="loadMissingPokemon(list, key)">
+  ```javascript
+  async loadMissingPokemon(list, key = 'name')
+  ```
+  
+  Loads detailed data for Pokémon that haven't been fetched yet. Uses batch processing (50 at a time) for performance.
+  
+  **Parameters:**
+  - `list` (Array): List of Pokémon IDs or names to load
+  - `key` (string): Either `'id'` or `'name'` to specify lookup type
+  
+  **Returns:** `Promise<void>`
+</Accordion>
+
+<Accordion title="fetchPokemonDetails(idOrName)">
+  ```javascript
+  async fetchPokemonDetails(idOrName)
+  ```
+  
+  Fetches complete details for a single Pokémon from the API, including species data for color and habitat information.
+  
+  **Parameters:**
+  - `idOrName` (number | string): Pokémon ID or name
+  
+  **Returns:** `Promise<Pokemon | null>` - Pokémon object or null if not found
+  
+  **Pokemon object structure:**
+  ```javascript
+  {
+    id: number,
+    name: string,
+    image: string,
+    types: Array<string>,
+    abilities: Array<string>,
+    stats: { hp, attack, defense, speed },
+    height: number,  // in meters
+    weight: number,  // in kilograms
+    baseExperience: number,
+    cry: string | null,  // audio URL
+    color: string | null,
+    habitat: string | null
+  }
+  ```
+</Accordion>
+
+### Search & Filtering
+
+<Accordion title="handleSearch(query)">
+  ```javascript
+  handleSearch(query)
+  ```
+  
+  Handles search input changes with debouncing (300ms). Updates suggestions and triggers search.
+  
+  **Parameters:**
+  - `query` (string): Search input value
+  
+  **Returns:** `void`
+</Accordion>
+
+<Accordion title="parseSmartSearch(query)">
+  ```javascript
+  parseSmartSearch(query)
+  ```
+  
+  Parses a search query to identify multiple criteria (name, type, color, habitat, size, weight).
+  
+  **Parameters:**
+  - `query` (string): Raw search query (e.g., "planta verde pequeño")
+  
+  **Returns:** `object` - Parsed criteria:
+  ```javascript
+  {
+    name: string,
+    type: string | null,
+    color: string | null,
+    habitat: string | null,
+    size: string | null,
+    weight: string | null
+  }
+  ```
+</Accordion>
+
+<Accordion title="performSearch(query)">
+  ```javascript
+  async performSearch(query)
+  ```
+  
+  Executes a search based on the query. Routes to smart search or name search depending on query content.
+  
+  **Parameters:**
+  - `query` (string): Search query
+  
+  **Returns:** `Promise<void>`
+</Accordion>
+
+<Accordion title="applyFilters()">
+  ```javascript
+  async applyFilters()
+  ```
+  
+  Applies all selected filter criteria (type, generation, color, habitat, size, weight) to the Pokémon list.
+  
+  **Returns:** `Promise<void>`
+</Accordion>
+
+### Display & UI
+
+<Accordion title="displayPokemon()">
+  ```javascript
+  displayPokemon()
+  ```
+  
+  Renders the current page of filtered Pokémon as cards in the grid. Shows/hides the grid and no-results message as appropriate.
+  
+  **Returns:** `void`
+</Accordion>
+
+<Accordion title="createPokemonCard(pokemon)">
+  ```javascript
+  createPokemonCard(pokemon)
+  ```
+  
+  Creates a complete DOM element for a Pokémon card with:
+  - Image with loading states
+  - Name and ID
+  - Type badges
+  - Expandable details (stats, abilities, physical attributes)
+  - Audio cry button (if available)
+  
+  **Parameters:**
+  - `pokemon` (Pokemon): Pokémon object
+  
+  **Returns:** `HTMLElement` - The card element
+</Accordion>
+
+<Accordion title="updatePagination()">
+  ```javascript
+  updatePagination()
+  ```
+  
+  Updates pagination controls based on the current page and total filtered results. Shows up to 5 page buttons at a time.
+  
+  **Returns:** `void`
+</Accordion>
+
+<Accordion title="populateFilters()">
+  ```javascript
+  populateFilters()
+  ```
+  
+  Populates all filter dropdowns with translated options from loaded data.
+  
+  **Returns:** `void`
+</Accordion>
+
+### Utility Methods
+
+<Accordion title="translate(key, translationMap, fallbackFormatter)">
+  ```javascript
+  translate(key, translationMap, fallbackFormatter = null)
+  ```
+  
+  Translates a key using the specified translation map from constants.
+  
+  **Parameters:**
+  - `key` (string): Key to translate
+  - `translationMap` (string): Name of the translation map (e.g., 'typeTranslations')
+  - `fallbackFormatter` (function | null): Optional formatter for untranslated keys
+  
+  **Returns:** `string` - Translated value
+</Accordion>
+
+<Accordion title="playPokemonCry(cryUrl, button)">
+  ```javascript
+  playPokemonCry(cryUrl, button)
+  ```
+  
+  Plays a Pokémon's cry audio and updates button state.
+  
+  **Parameters:**
+  - `cryUrl` (string): URL to the audio file
+  - `button` (HTMLElement): The cry button element
+  
+  **Returns:** `void`
+</Accordion>
+
+<Accordion title="resetAllFilters()">
+  ```javascript
+  resetAllFilters()
+  ```
+  
+  Resets all filters and search to initial state without reloading data.
+  
+  **Returns:** `void`
+</Accordion>
+
+<Accordion title="clearAllFilters()">
+  ```javascript
+  clearAllFilters()
+  ```
+  
+  Clears all filters and applies changes to show all loaded Pokémon.
+  
+  **Returns:** `void`
+</Accordion>
+
+<Accordion title="showLoading(show, message)">
+  ```javascript
+  showLoading(show, message = 'Cargando Pokémon...')
+  ```
+  
+  Shows or hides the loading indicator.
+  
+  **Parameters:**
+  - `show` (boolean): Whether to show the indicator
+  - `message` (string): Loading message text
+  
+  **Returns:** `void`
+</Accordion>
+
+<Accordion title="showError(message) / clearError()">
+  ```javascript
+  showError(message)
+  clearError()
+  ```
+  
+  Displays or clears error messages.
+  
+  **Parameters:**
+  - `message` (string): Error message to display
+  
+  **Returns:** `void`
+</Accordion>
+
+## Usage Example
+
+<CodeGroup>
+```javascript Basic Initialization
+// Initialize the explorer
+const explorer = new PokemonExplorer();
+
+// Access from global scope
+window.pokemonExplorer = explorer;
+```
+
+```javascript Programmatic Search
+// Search by name
+await explorer.performSearch('pikachu');
+
+// Search with multiple criteria
+await explorer.performSearch('fuego rojo');
+```
+
+```javascript Filter Management
+// Apply specific filters
+explorer.elements.typeFilter.value = 'fire';
+explorer.elements.generationFilter.value = '1';
+await explorer.applyFilters();
+
+// Clear all filters
+explorer.clearAllFilters();
+```
+
+```javascript Data Access
+// Get a Pokémon by ID
+const pikachu = explorer.pokemonById.get(25);
+
+// Get a Pokémon by name
+const charizard = explorer.pokemonByName.get('charizard');
+
+// Get all filtered results
+const results = explorer.filteredPokemon;
+```
+</CodeGroup>
+
+## Events
+
+The class automatically sets up event listeners for:
+- Search input (with debouncing)
+- All filter dropdowns
+- Focus/blur on search field
+- Click outside to close suggestions
+
+## Performance
+
+- **Lazy loading**: Pokémon details are only fetched when needed
+- **Batch processing**: Multiple API calls are grouped (50 per batch)
+- **Caching**: All fetched Pokémon are cached in memory (Map structures)
+- **Debouncing**: Search queries are debounced by 300ms
+- **Pagination**: Only renders 12 Pokémon per page
+
+## See Also
+
+- [PokemonTour](/api/pokemon-tour) - Interactive tour guide class
+- [Search Guide](/guides/search) - How to use smart search features
+- [Filtering Guide](/guides/filtering) - Advanced filtering options

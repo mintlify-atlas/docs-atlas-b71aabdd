@@ -1,0 +1,213 @@
+---
+title: 'Constants'
+description: 'Configuration constants for Pokemon types, generations, and search functionality'
+---
+
+## Overview
+
+The `constants` object contains core configuration data used throughout the Pokemon Explorer application, including generation ranges, type colors, and search keyword mappings.
+
+## Generation Ranges
+
+### genRanges
+
+Defines the Pokemon ID ranges for each generation.
+
+```javascript
+genRanges: {
+    '1': [1, 151],
+    '2': [152, 251],
+    '3': [252, 386],
+    '4': [387, 493],
+    '5': [494, 649],
+    '6': [650, 721],
+    '7': [722, 809],
+    '8': [810, 905],
+    '9': [906, 1025]
+}
+```
+
+**Structure:**
+- **Key**: Generation number (string)
+- **Value**: Array with two elements `[start, end]`
+  - `start` (number): First Pokemon ID in the generation
+  - `end` (number): Last Pokemon ID in the generation
+
+<Note>
+These ranges are used to filter Pokemon by generation in the search functionality.
+</Note>
+
+## Type Colors
+
+### typeColors
+
+CSS gradient definitions for each Pokemon type, used for visual styling throughout the UI.
+
+```javascript
+typeColors: {
+    normal: 'linear-gradient(135deg, #A8A878, #C6C684)',
+    fire: 'linear-gradient(135deg, #F08030, #F5A652)',
+    water: 'linear-gradient(135deg, #6890F0, #85A8F7)',
+    electric: 'linear-gradient(135deg, #F8D030, #FAE078)',
+    grass: 'linear-gradient(135deg, #78C850, #9ADB71)',
+    ice: 'linear-gradient(135deg, #98D8D8, #BCE6E6)',
+    fighting: 'linear-gradient(135deg, #C03028, #D67873)',
+    poison: 'linear-gradient(135deg, #A040A0, #C77ABA)',
+    ground: 'linear-gradient(135deg, #E0C068, #EAD69C)',
+    flying: 'linear-gradient(135deg, #A890F0, #C7B2F7)',
+    psychic: 'linear-gradient(135deg, #F85888, #FA92B2)',
+    bug: 'linear-gradient(135deg, #A8B820, #C2D21E)',
+    rock: 'linear-gradient(135deg, #B8A038, #D0C158)',
+    ghost: 'linear-gradient(135deg, #705898, #A292BC)',
+    dragon: 'linear-gradient(135deg, #7038F8, #A27DFA)',
+    dark: 'linear-gradient(135deg, #705848, #A29288)',
+    steel: 'linear-gradient(135deg, #B8B8D0, #D1D1E0)',
+    fairy: 'linear-gradient(135deg, #EE99AC, #F4C2C2)'
+}
+```
+
+**Structure:**
+- **Key**: Pokemon type (lowercase string)
+- **Value**: CSS linear-gradient string with 135-degree angle
+
+<AccordionGroup>
+<Accordion title="All Type Colors">
+| Type | Gradient |
+|------|----------|
+| Normal | `#A8A878` → `#C6C684` |
+| Fire | `#F08030` → `#F5A652` |
+| Water | `#6890F0` → `#85A8F7` |
+| Electric | `#F8D030` → `#FAE078` |
+| Grass | `#78C850` → `#9ADB71` |
+| Ice | `#98D8D8` → `#BCE6E6` |
+| Fighting | `#C03028` → `#D67873` |
+| Poison | `#A040A0` → `#C77ABA` |
+| Ground | `#E0C068` → `#EAD69C` |
+| Flying | `#A890F0` → `#C7B2F7` |
+| Psychic | `#F85888` → `#FA92B2` |
+| Bug | `#A8B820` → `#C2D21E` |
+| Rock | `#B8A038` → `#D0C158` |
+| Ghost | `#705898` → `#A292BC` |
+| Dragon | `#7038F8` → `#A27DFA` |
+| Dark | `#705848` → `#A29288` |
+| Steel | `#B8B8D0` → `#D1D1E0` |
+| Fairy | `#EE99AC` → `#F4C2C2` |
+</Accordion>
+</AccordionGroup>
+
+## Search Keywords
+
+### searchKeywords
+
+Maps Spanish search terms to their English API equivalents, enabling bilingual search functionality.
+
+```javascript
+searchKeywords: {
+    // Type translations
+    'fuego': 'fire',
+    'agua': 'water',
+    'planta': 'grass',
+    'eléctrico': 'electric',
+    'electrico': 'electric',
+    // ... more mappings
+}
+```
+
+**Structure:**
+- **Key**: Spanish term (lowercase string, with and without accents)
+- **Value**: English API term (lowercase string)
+
+<AccordionGroup>
+<Accordion title="Type Keywords">
+```javascript
+'fuego': 'fire',
+'agua': 'water',
+'planta': 'grass',
+'eléctrico': 'electric',
+'electrico': 'electric',
+'hielo': 'ice',
+'lucha': 'fighting',
+'veneno': 'poison',
+'tierra': 'ground',
+'volador': 'flying',
+'psíquico': 'psychic',
+'psiquico': 'psychic',
+'bicho': 'bug',
+'roca': 'rock',
+'fantasma': 'ghost',
+'dragón': 'dragon',
+'dragon': 'dragon',
+'siniestro': 'dark',
+'acero': 'steel',
+'hada': 'fairy',
+'normal': 'normal'
+```
+</Accordion>
+
+<Accordion title="Color Keywords">
+```javascript
+'negro': 'black',
+'azul': 'blue',
+'marrón': 'brown',
+'marron': 'brown',
+'gris': 'gray',
+'verde': 'green',
+'rosa': 'pink',
+'morado': 'purple',
+'rojo': 'red',
+'blanco': 'white',
+'amarillo': 'yellow'
+```
+</Accordion>
+
+<Accordion title="Habitat Keywords">
+```javascript
+'cueva': 'cave',
+'bosque': 'forest',
+'pradera': 'grassland',
+'montaña': 'mountain',
+'montana': 'mountain',
+'raro': 'rare',
+'terreno áspero': 'rough-terrain',
+'terreno aspero': 'rough-terrain',
+'mar': 'sea',
+'urbano': 'urban',
+'orilla': 'waters-edge'
+```
+</Accordion>
+
+<Accordion title="Size Keywords">
+```javascript
+'pequeño': 'small',
+'pequeno': 'small',
+'muy pequeño': 'tiny',
+'muy pequeno': 'tiny',
+'mediano': 'medium',
+'grande': 'large',
+'enorme': 'huge',
+'gigante': 'huge',
+'ligero': 'light',
+'pesado': 'heavy',
+'masivo': 'massive'
+```
+</Accordion>
+</AccordionGroup>
+
+<Note>
+The search keywords object includes variations both with and without Spanish accents to improve search accessibility.
+</Note>
+
+## Usage Example
+
+```javascript
+// Access generation ranges
+const gen1Range = constants.genRanges['1']; // [1, 151]
+
+// Get type color for styling
+const fireGradient = constants.typeColors.fire;
+// 'linear-gradient(135deg, #F08030, #F5A652)'
+
+// Translate search term
+const searchTerm = 'fuego';
+const apiTerm = constants.searchKeywords[searchTerm]; // 'fire'
+```

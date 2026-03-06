@@ -1,0 +1,223 @@
+---
+title: "Smart Search"
+description: "Real-time search with multi-criteria support in Spanish and English"
+---
+
+## Overview
+
+Pokémon Explorer features a powerful smart search system that allows you to find Pokémon using multiple search criteria. The search engine supports both Spanish and English keywords and can search by name, type, color, habitat, size, and weight.
+
+## Search Capabilities
+
+<CardGroup cols={2}>
+  <Card title="Name Search" icon="signature">
+    Search for Pokémon by their exact or partial name
+  </Card>
+  <Card title="Type Search" icon="wand-magic-sparkles">
+    Find Pokémon by type using Spanish or English keywords
+  </Card>
+  <Card title="Color Search" icon="palette">
+    Filter Pokémon by their primary color
+  </Card>
+  <Card title="Habitat Search" icon="tree">
+    Search by natural habitat (cave, forest, sea, etc.)
+  </Card>
+  <Card title="Size Search" icon="ruler-vertical">
+    Find Pokémon by size category (tiny, small, medium, large, huge)
+  </Card>
+  <Card title="Weight Search" icon="weight-scale">
+    Filter by weight category (light, heavy, massive)
+  </Card>
+</CardGroup>
+
+## How It Works
+
+### Search Input Handler
+
+The search system uses a debounced input handler to optimize performance:
+
+```javascript logica.js
+handleSearch(query) {
+    clearTimeout(this.searchTimeout);
+    this.clearError();
+
+    if (!query.trim()) {
+        this.hideSuggestions();
+        this.applyFilters();
+        return;
+    }
+
+    if (query.length < 2) {
+        this.showError('Ingresa al menos 2 caracteres');
+        return;
+    }
+
+    this.searchTimeout = setTimeout(() => this.performSearch(query), 300);
+    this.updateSuggestions(query);
+}
+```
+
+<Note>
+The search includes a 300ms debounce to prevent excessive API calls while typing.
+</Note>
+
+### Smart Search Parsing
+
+The `parseSmartSearch()` method analyzes your query and identifies search criteria:
+
+```javascript logica.js
+parseSmartSearch(query) {
+    const criteria = { name: '', type: null, color: null, habitat: null, size: null, weight: null };
+    const words = query.toLowerCase().trim().split(/\s+/);
+    const remainingWords = [];
+
+    for (const word of words) {
+        const keyword = this.constants.searchKeywords[word];
+        if (keyword) {
+            if (categoryMap.types.includes(keyword)) criteria.type = keyword;
+            else if (categoryMap.colors.includes(keyword)) criteria.color = keyword;
+            else if (categoryMap.habitats.includes(keyword)) criteria.habitat = keyword;
+            else if (categoryMap.sizes.includes(keyword)) criteria.size = keyword;
+            else if (categoryMap.weights.includes(keyword)) criteria.weight = keyword;
+        } else {
+            remainingWords.push(word);
+        }
+    }
+
+    criteria.name = remainingWords.join(' ');
+    return criteria;
+}
+```
+
+## Search Suggestions
+
+As you type, the search provides real-time suggestions:
+
+```javascript logica.js
+updateSuggestions(query) {
+    const lowerQuery = query.toLowerCase();
+    const nameMatches = this.pokemonNames.filter(name => 
+        name.toLowerCase().includes(lowerQuery)
+    ).slice(0, 3);
+    const keywordMatches = Object.keys(this.constants.searchKeywords).filter(keyword => 
+        keyword.includes(lowerQuery)
+    ).slice(0, 2);
+    const suggestions = [...nameMatches, ...keywordMatches].slice(0, 5);
+
+    if (suggestions.length > 0 && query.length >= 2) {
+        this.displaySuggestions(suggestions);
+        this.showSuggestions();
+    }
+}
+```
+
+<Tip>
+Suggestions show up to 3 matching Pokémon names and 2 matching keywords, for a maximum of 5 suggestions.
+</Tip>
+
+## Search Types
+
+### Name Search
+
+Searches the cached Pokémon data first, then queries the API if needed:
+
+```javascript logica.js
+async performNameSearch(query) {
+    const lowerQuery = query.toLowerCase();
+    let found = [...this.pokemonByName.values()].filter(p => 
+        p.name.includes(lowerQuery)
+    );
+
+    if (!found.length && query.trim()) {
+        const pokemon = await this.fetchPokemonDetails(lowerQuery);
+        if (pokemon) {
+            this.allPokemon.sort((a, b) => a.id - b.id);
+            found = [pokemon];
+        }
+    }
+
+    this.filteredPokemon = found;
+    this.currentPage = 1;
+    this.displayPokemon();
+}
+```
+
+### Multi-Criteria Search
+
+Combines multiple search criteria for precise results:
+
+```javascript logica.js
+async performSmartSearch(criteria) {
+    if (criteria.type) {
+        await this.loadPokemonByType(criteria.type);
+    }
+
+    const results = this._applyPokemonFilters([...this.pokemonById.values()], criteria);
+    this.filteredPokemon = results;
+    this.currentPage = 1;
+    this.displayPokemon();
+}
+```
+
+## Supported Keywords
+
+The search system supports both Spanish and English keywords:
+
+<AccordionGroup>
+  <Accordion title="Type Keywords">
+    - **Spanish**: fuego, agua, planta, eléctrico, hielo, lucha, veneno, tierra, volador, psíquico, bicho, roca, fantasma, dragón, siniestro, acero, hada
+    - **English**: fire, water, grass, electric, ice, fighting, poison, ground, flying, psychic, bug, rock, ghost, dragon, dark, steel, fairy
+  </Accordion>
+  
+  <Accordion title="Color Keywords">
+    - **Spanish**: negro, azul, marrón, gris, verde, rosa, morado, rojo, blanco, amarillo
+    - **English**: black, blue, brown, gray, green, pink, purple, red, white, yellow
+  </Accordion>
+  
+  <Accordion title="Habitat Keywords">
+    - **Spanish**: cueva, bosque, pradera, montaña, raro, mar, urbano, orilla
+    - **English**: cave, forest, grassland, mountain, rare, sea, urban, waters-edge
+  </Accordion>
+  
+  <Accordion title="Size Keywords">
+    - **Spanish**: muy pequeño, pequeño, mediano, grande, enorme, gigante
+    - **English**: tiny, small, medium, large, huge
+  </Accordion>
+  
+  <Accordion title="Weight Keywords">
+    - **Spanish**: ligero, pesado, masivo
+    - **English**: light, heavy, massive
+  </Accordion>
+</AccordionGroup>
+
+## Example Searches
+
+<CardGroup cols={2}>
+  <Card title="By Name" icon="search">
+    `pikachu` or `char` (partial matches work)
+  </Card>
+  <Card title="By Type" icon="fire">
+    `fuego` or `fire` (finds all Fire-type Pokémon)
+  </Card>
+  <Card title="By Color" icon="droplet">
+    `azul` or `blue` (finds blue Pokémon)
+  </Card>
+  <Card title="Combined Search" icon="layer-group">
+    `planta verde` (finds green Grass-type Pokémon)
+  </Card>
+</CardGroup>
+
+<Info>
+You can combine multiple criteria in a single search query. For example: "grande rojo" will find large, red Pokémon.
+</Info>
+
+## Performance Optimizations
+
+1. **Debouncing**: 300ms delay prevents excessive API calls
+2. **Caching**: Uses `Map` data structures for O(1) lookups
+3. **Lazy Loading**: Only fetches Pokémon data when needed
+4. **Batch Processing**: Loads multiple Pokémon in parallel batches of 50
+
+<Warning>
+The search requires a minimum of 2 characters to activate.
+</Warning>

@@ -1,0 +1,250 @@
+---
+title: "Interactive Pokémon Cards"
+description: "Beautiful cards displaying stats, abilities, types, and images"
+---
+
+## Overview
+
+Each Pokémon is displayed in an interactive card that shows essential information at a glance and reveals detailed stats when expanded.
+
+## Card Structure
+
+Pokémon cards are dynamically generated using the `createPokemonCard()` method:
+
+```javascript logica.js
+createPokemonCard(pokemon) {
+    const card = document.createElement('div');
+    card.className = 'pokemon-card';
+    const backgroundGradient = this.constants.typeColors[pokemon.types[0]] || 
+        'linear-gradient(135deg, #667eea, #764ba2)';
+
+    // Card content generation...
+    card.style.setProperty('--card-gradient', backgroundGradient);
+    card.style.background = backgroundGradient;
+
+    return card;
+}
+```
+
+## Card Components
+
+<CardGroup cols={2}>
+  <Card title="Pokémon Image" icon="image">
+    High-quality official artwork from PokeAPI
+  </Card>
+  <Card title="Name & ID" icon="id-badge">
+    Pokémon name and Pokédex number
+  </Card>
+  <Card title="Types" icon="tags">
+    Type badges with color-coded backgrounds
+  </Card>
+  <Card title="Stats" icon="chart-simple">
+    HP, Attack, Defense, and Speed values
+  </Card>
+  <Card title="Abilities" icon="star">
+    Up to 3 Pokémon abilities in Spanish
+  </Card>
+  <Card title="Physical Info" icon="ruler">
+    Height, weight, and base experience
+  </Card>
+  <Card title="Color & Habitat" icon="map-location">
+    Primary color and natural habitat
+  </Card>
+  <Card title="Audio Cry" icon="volume-high">
+    Playable Pokémon sound effect
+  </Card>
+</CardGroup>
+
+## Card HTML Structure
+
+```javascript logica.js
+card.innerHTML = `
+    <div class="pokemon-card-content">
+        <div class="pokemon-image">
+            <div class="image-placeholder"><div class="loading-spinner"></div></div>
+            <img src="${pokemon.image}" alt="${pokemon.name}" loading="lazy">
+            ${pokemon.cry ? `<button class="cry-button" title="Clic para activar audio">🔊</button>` : ''}
+        </div>
+        <div class="pokemon-name">${pokemon.name}</div>
+        <div class="pokemon-id">#${String(pokemon.id).padStart(3, '0')}</div>
+        <div class="pokemon-types">${pokemon.types.map(type => 
+            `<span class="type-badge type-${type}">${this.translate(type, 'typeTranslations')}</span>`
+        ).join('')}</div>
+        <button class="toggle-info">Ver más</button>
+        <div class="extra-info" style="display: none;">
+            ${detailsHtml}
+            ${statsHtml}
+        </div>
+    </div>
+`;
+```
+
+## Type Colors
+
+Each card's background gradient is determined by the Pokémon's primary type:
+
+```javascript logica.js
+typeColors: {
+    normal: 'linear-gradient(135deg, #A8A878, #C6C684)',
+    fire: 'linear-gradient(135deg, #F08030, #F5A652)',
+    water: 'linear-gradient(135deg, #6890F0, #85A8F7)',
+    electric: 'linear-gradient(135deg, #F8D030, #FAE078)',
+    grass: 'linear-gradient(135deg, #78C850, #9ADB71)',
+    ice: 'linear-gradient(135deg, #98D8D8, #BCE6E6)',
+    fighting: 'linear-gradient(135deg, #C03028, #D67873)',
+    poison: 'linear-gradient(135deg, #A040A0, #C77ABA)',
+    ground: 'linear-gradient(135deg, #E0C068, #EAD69C)',
+    flying: 'linear-gradient(135deg, #A890F0, #C7B2F7)',
+    psychic: 'linear-gradient(135deg, #F85888, #FA92B2)',
+    bug: 'linear-gradient(135deg, #A8B820, #C2D21E)',
+    rock: 'linear-gradient(135deg, #B8A038, #D0C158)',
+    ghost: 'linear-gradient(135deg, #705898, #A292BC)',
+    dragon: 'linear-gradient(135deg, #7038F8, #A27DFA)',
+    dark: 'linear-gradient(135deg, #705848, #A29288)',
+    steel: 'linear-gradient(135deg, #B8B8D0, #D1D1E0)',
+    fairy: 'linear-gradient(135deg, #EE99AC, #F4C2C2)'
+}
+```
+
+<Info>
+The gradient is applied as a CSS custom property so it can be used for hover effects and transitions.
+</Info>
+
+## Card Details
+
+### Physical Information
+
+```javascript logica.js
+const detailsHtml = `
+    <div class="pokemon-details">
+        <div class="pokemon-info-row"><span>Altura:</span><span>${pokemon.height}m</span></div>
+        <div class="pokemon-info-row"><span>Peso:</span><span>${pokemon.weight}kg</span></div>
+        <div class="pokemon-info-row"><span>Experiencia:</span><span>${pokemon.baseExperience} XP</span></div>
+        ${pokemon.color ? `<div class="pokemon-info-row"><span>Color:</span><span class="color-with-indicator">
+            <span class="color-dot color-dot-${pokemon.color}"></span>
+            <span class="pokemon-color-${pokemon.color}">${this.translate(pokemon.color, 'colorTranslations')}</span>
+        </span></div>` : '<div class="pokemon-info-row"><span>Color:</span><span class="info-unavailable">No disponible</span></div>'}
+        ${pokemon.habitat ? `<div class="pokemon-info-row"><span>Hábitat:</span><span>${this.translate(pokemon.habitat, 'habitatTranslations')}</span></div>` : '<div class="pokemon-info-row"><span>Hábitat:</span><span class="info-unavailable">No disponible</span></div>'}
+    </div>
+`;
+```
+
+### Stats Display
+
+```javascript logica.js
+const statsHtml = `
+    <div class="pokemon-stats">
+        ${[['❤️ HP', pokemon.stats.hp], 
+           ['⚔️ Ataque', pokemon.stats.attack], 
+           ['🛡️ Defensa', pokemon.stats.defense], 
+           ['⚡ Velocidad', pokemon.stats.speed]]
+        .map(([name, value]) => 
+            `<div class="stat-item">
+                <div class="stat-name">${name}</div>
+                <div class="stat-value">${value}</div>
+            </div>`
+        ).join('')}
+    </div>
+`;
+```
+
+<Note>
+Stats are extracted from the Pokémon's base stats array returned by the PokeAPI.
+</Note>
+
+## Abilities Display
+
+Abilities are displayed as badges with Spanish translations:
+
+```javascript logica.js
+<div class="abilities-section">
+    <div class="pokemon-info-label">Habilidades:</div>
+    <div class="abilities-list">
+        ${pokemon.abilities.slice(0, 3).map(ability => 
+            `<span class="ability-badge">${this.translate(ability, 'abilityTranslations', 
+                (a) => a.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+            )}</span>`
+        ).join('')}
+    </div>
+</div>
+```
+
+<Tip>
+Up to 3 abilities are shown. If a translation isn't available, the ability name is formatted with proper capitalization.
+</Tip>
+
+## Interactive Features
+
+### Toggle Detailed View
+
+Cards have a "Ver más" button that toggles the expanded view:
+
+```javascript logica.js
+const toggleBtn = card.querySelector('.toggle-info');
+const extraInfo = card.querySelector('.extra-info');
+toggleBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const isOpen = card.classList.toggle('open');
+    toggleBtn.textContent = isOpen ? 'Ver menos' : 'Ver más';
+    extraInfo.style.display = isOpen ? 'block' : 'none';
+});
+```
+
+### Audio Playback
+
+Cards with Pokémon cries include an audio button:
+
+```javascript logica.js
+if (pokemon.cry) {
+    const cryButton = card.querySelector('.cry-button');
+    cryButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.playPokemonCry(pokemon.cry, cryButton);
+        this.audioActivated = true;
+    });
+    cryButton.addEventListener('mouseenter', (e) => {
+        e.stopPropagation();
+        if (this.audioActivated) {
+            this.playPokemonCry(pokemon.cry, cryButton);
+        }
+    });
+}
+```
+
+<Warning>
+Audio playback requires user interaction first (click the 🔊 button), then subsequent plays can be triggered by hovering.
+</Warning>
+
+## Image Loading
+
+Images load with a placeholder spinner:
+
+```javascript logica.js
+<img src="${pokemon.image}" 
+     alt="${pokemon.name}" 
+     loading="lazy" 
+     onload="this.style.opacity=1; this.previousElementSibling.style.display='none';" 
+     onerror="this.src='data:image/svg+xml;base64,...'; this.previousElementSibling.style.display='none';" 
+     style="opacity: 0; transition: opacity 0.3s ease;">
+```
+
+<Info>
+Images use lazy loading for better performance and include a fallback SVG if the image fails to load.
+</Info>
+
+## Animation
+
+Cards appear with a staggered animation:
+
+```javascript logica.js
+pokemonToShow.forEach((pokemon, index) => {
+    const card = this.createPokemonCard(pokemon);
+    card.style.animationDelay = `${index * 0.1}s`;
+    pokemonGrid.appendChild(card);
+});
+```
+
+<Tip>
+Each card animates in 0.1 seconds after the previous one, creating a smooth cascade effect.
+</Tip>

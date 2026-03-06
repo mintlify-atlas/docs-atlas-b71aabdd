@@ -1,0 +1,389 @@
+---
+title: "PokemonTour"
+description: "Interactive tour guide class for onboarding users"
+---
+
+## Overview
+
+The `PokemonTour` class provides an interactive, step-by-step tour of the Pokémon Explorer application. It highlights UI elements, displays instructional popups, and ensures Pokémon data is loaded before showing relevant steps.
+
+## Constructor
+
+```javascript
+const tour = new PokemonTour();
+```
+
+Initializes the tour with:
+- Step definitions
+- Current step tracking (starts at 0)
+- Overlay and popup references (initially null)
+
+## Properties
+
+<ParamField path="currentStep" type="number" default="0">
+  Index of the currently displayed tour step
+</ParamField>
+
+<ParamField path="steps" type="Array<TourStep>">
+  Array of tour step objects, each containing:
+  
+  <Expandable title="TourStep structure">
+    <ResponseField name="element" type="string">
+      CSS selector for the element to highlight (e.g., `'#search-section'`)
+    </ResponseField>
+    <ResponseField name="title" type="string">
+      Step title with emoji (e.g., `'🔍 Búsqueda Inteligente'`)
+    </ResponseField>
+    <ResponseField name="description" type="string">
+      Detailed explanation of the feature
+    </ResponseField>
+  </Expandable>
+</ParamField>
+
+<ParamField path="overlay" type="HTMLElement | null">
+  Reference to the dark overlay element (created when tour starts)
+</ParamField>
+
+<ParamField path="popup" type="HTMLElement | null">
+  Reference to the popup element containing tour content
+</ParamField>
+
+## Tour Steps
+
+The default tour includes 5 steps:
+
+1. **Search Section** (`#search-section`) - Smart search capabilities
+2. **Filters Section** (`#filters-section`) - Advanced filtering options
+3. **Pokémon Grid** (`#pokemonGrid`) - Card display and interactions
+4. **Pagination** (`#pagination`) - Navigation controls
+5. **Completion** (`body`) - Final encouragement message
+
+## Core Methods
+
+### Tour Control
+
+<Accordion title="start()">
+  ```javascript
+  async start()
+  ```
+  
+  Starts the interactive tour. Automatically loads Pokémon data if the grid is empty or pagination is missing.
+  
+  **Behavior:**
+  1. Checks if tour is already active (prevents duplicate tours)
+  2. Resets to step 0
+  3. Creates overlay and popup elements
+  4. Adds `tour-in-progress` class to body
+  5. Checks for Pokémon data availability
+  6. Loads 25 Pokémon if needed (shows loading step)
+  7. Displays first tour step
+  
+  **Returns:** `Promise<void>`
+  
+  **Example:**
+  ```javascript
+  const tour = new PokemonTour();
+  await tour.start();
+  ```
+</Accordion>
+
+<Accordion title="showStep()">
+  ```javascript
+  showStep()
+  ```
+  
+  Displays the current tour step with:
+  - Title and description update
+  - Element highlighting
+  - Popup positioning
+  - Smooth scrolling to element
+  - Navigation button updates
+  
+  **Process:**
+  1. Hides popup and overlay (300ms transition)
+  2. Removes previous highlights
+  3. Updates popup content
+  4. Highlights target element
+  5. Positions popup relative to element
+  6. Scrolls element into view
+  7. Shows popup and overlay
+  
+  **Returns:** `void`
+</Accordion>
+
+<Accordion title="nextStep()">
+  ```javascript
+  nextStep()
+  ```
+  
+  Advances to the next tour step (if not at the end).
+  
+  **Returns:** `void`
+</Accordion>
+
+<Accordion title="previousStep()">
+  ```javascript
+  previousStep()
+  ```
+  
+  Goes back to the previous tour step (if not at the beginning).
+  
+  **Returns:** `void`
+</Accordion>
+
+<Accordion title="close()">
+  ```javascript
+  close()
+  ```
+  
+  Closes the tour and cleans up:
+  - Hides popup and overlay (with transition)
+  - Removes highlight from elements
+  - Removes `tour-in-progress` class from body
+  - Removes overlay and popup from DOM (after 300ms)
+  - Resets references to null
+  - Scrolls page to top
+  
+  **Returns:** `void`
+</Accordion>
+
+### UI Management
+
+<Accordion title="createElements()">
+  ```javascript
+  createElements()
+  ```
+  
+  Creates the tour overlay and popup DOM elements with:
+  - Dark overlay backdrop
+  - Popup container with header, content, and footer
+  - Close button
+  - Navigation buttons (previous, next, finish)
+  - Progress indicator
+  - Directional arrow
+  
+  Attaches all necessary event listeners:
+  - Overlay click → close tour
+  - Close button → close tour
+  - Previous button → previous step
+  - Next button → next step
+  - Finish button → close tour
+  
+  **Returns:** `void`
+</Accordion>
+
+<Accordion title="showLoadingStep()">
+  ```javascript
+  showLoadingStep()
+  ```
+  
+  Displays a special loading step while Pokémon data is being fetched.
+  
+  **Content:**
+  - Title: "⏳ Preparando la Guía Interactiva"
+  - Description: "Cargando Pokémon para mostrarte todas las funciones..."
+  - Progress: "Preparando..."
+  - All navigation buttons hidden
+  - Popup centered on screen
+  
+  **Returns:** `void`
+</Accordion>
+
+### Positioning
+
+<Accordion title="positionPopup(element)">
+  ```javascript
+  positionPopup(element)
+  ```
+  
+  Intelligently positions the popup relative to the highlighted element.
+  
+  **Parameters:**
+  - `element` (HTMLElement): The element to position relative to
+  
+  **Positioning logic:**
+  1. Calculates available space in all directions
+  2. Prioritizes: bottom → top → right → left
+  3. Adjusts if popup would overflow viewport
+  4. Positions arrow to point at element
+  5. Maintains 15px margin from viewport edges
+  
+  **Arrow classes:**
+  - `.tour-arrow.bottom` - Arrow points up (popup below element)
+  - `.tour-arrow.top` - Arrow points down (popup above element)
+  - `.tour-arrow.right` - Arrow points left (popup to the right)
+  - `.tour-arrow.left` - Arrow points right (popup to the left)
+  
+  **Returns:** `void`
+</Accordion>
+
+<Accordion title="centerPopup()">
+  ```javascript
+  centerPopup()
+  ```
+  
+  Centers the popup in the viewport (used for loading step or when element is not visible).
+  
+  **Styling applied:**
+  - `top: 50%`
+  - `left: 50%`
+  - `transform: translate(-50%, -50%)`
+  - Arrow hidden
+  
+  **Returns:** `void`
+</Accordion>
+
+### Highlighting
+
+<Accordion title="highlightElement(element)">
+  ```javascript
+  highlightElement(element)
+  ```
+  
+  Adds the `tour-highlighted` CSS class to an element to make it stand out during the tour.
+  
+  **Parameters:**
+  - `element` (HTMLElement): Element to highlight
+  
+  **Returns:** `void`
+</Accordion>
+
+<Accordion title="removeHighlight()">
+  ```javascript
+  removeHighlight()
+  ```
+  
+  Removes the `tour-highlighted` class from any currently highlighted element.
+  
+  **Returns:** `void`
+</Accordion>
+
+### Button Management
+
+<Accordion title="updateButtons()">
+  ```javascript
+  updateButtons()
+  ```
+  
+  Updates the visibility of navigation buttons based on the current step:
+  - **First step**: Hide "Previous" button
+  - **Last step**: Hide "Next" button, show "Finish" button
+  - **Middle steps**: Show "Previous" and "Next" buttons
+  
+  **Returns:** `void`
+</Accordion>
+
+## Usage Example
+
+<CodeGroup>
+```javascript Basic Usage
+// Create and start the tour
+const tour = new PokemonTour();
+await tour.start();
+```
+
+```javascript Button Integration
+// Attach to a button
+const startTourBtn = document.getElementById('startTour');
+startTourBtn.addEventListener('click', async () => {
+  const tour = new PokemonTour();
+  await tour.start();
+});
+```
+
+```javascript Custom Steps
+// Create a tour with custom steps
+const tour = new PokemonTour();
+tour.steps = [
+  {
+    element: '#my-feature',
+    title: '✨ New Feature',
+    description: 'Check out this awesome new feature!'
+  },
+  {
+    element: '#another-section',
+    title: '🎯 Another Section',
+    description: 'Here\'s how to use this section...'
+  }
+];
+await tour.start();
+```
+
+```javascript Programmatic Navigation
+const tour = new PokemonTour();
+await tour.start();
+
+// Navigate programmatically
+setTimeout(() => tour.nextStep(), 2000);
+setTimeout(() => tour.previousStep(), 4000);
+setTimeout(() => tour.close(), 6000);
+```
+</CodeGroup>
+
+## Integration with PokemonExplorer
+
+The tour integrates with the main `PokemonExplorer` class:
+
+```javascript
+// Accesses the global explorer instance
+if (window.pokemonExplorer) {
+  await window.pokemonExplorer.loadMissingPokemon(
+    [...Array(25).keys()].map(i => i + 1),
+    'id'
+  );
+  window.pokemonExplorer.updatePagination();
+}
+```
+
+## Initialization
+
+The tour is automatically initialized when the DOM loads:
+
+```javascript
+document.addEventListener('DOMContentLoaded', () => {
+  window.pokemonExplorer = new PokemonExplorer();
+  initializeTourNew();
+});
+
+function initializeTourNew() {
+  const tour = new PokemonTour();
+  const startTourBtn = document.getElementById('startTour');
+  if (startTourBtn) {
+    startTourBtn.addEventListener('click', () => tour.start());
+  }
+}
+```
+
+## CSS Classes
+
+The tour relies on these CSS classes (defined in your stylesheet):
+
+- `.tour-overlay` - Dark backdrop
+- `.tour-popup` - Main popup container
+- `.tour-popup.visible` - Visible state with animation
+- `.tour-highlighted` - Highlighted element style
+- `.tour-arrow` - Directional arrow
+- `.tour-arrow.top/bottom/left/right` - Arrow positioning
+- `.tour-in-progress` - Applied to body during tour
+
+## Accessibility Features
+
+- **Smooth scrolling**: Elements scroll into view smoothly
+- **Keyboard support**: Close on overlay click
+- **Visual feedback**: Clear highlighting and transitions
+- **Progress indicator**: Shows "X of Y" step counter
+- **Responsive positioning**: Adapts to viewport constraints
+
+## Performance Considerations
+
+- **Lazy data loading**: Only loads Pokémon when needed
+- **Transition delays**: 300ms transitions prevent jarring changes
+- **Element checks**: Verifies element visibility before positioning
+- **Cleanup**: Properly removes DOM elements and event listeners
+- **Debouncing**: Prevents duplicate tour instances
+
+## See Also
+
+- [PokemonExplorer](/api/pokemon-explorer) - Main application class
+- [Getting Started](/getting-started) - Application overview
+- [User Guide](/guides/overview) - Complete feature guide

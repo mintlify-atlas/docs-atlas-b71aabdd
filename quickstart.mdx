@@ -1,80 +1,341 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quickstart
+description: Get started with Pokémon Explorer in under 2 minutes
 ---
 
-## Get started in three steps
+# Quickstart Guide
 
-Get your documentation site running locally and make your first customization.
+Get Pokémon Explorer running on your local machine in just a few steps. No build process, no npm install—just pure HTML, CSS, and JavaScript.
 
-### Step 1: Set up your local environment
+<Note>
+Pokémon Explorer is a static frontend application with zero dependencies. Simply open the HTML file in a browser and start exploring!
+</Note>
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
+## Quick Start
+
+<Steps>
+  <Step title="Clone the Repository">
+    ```bash
+    git clone https://github.com/mueses1/PokeApi.git
+    cd PokeApi
+    ```
+  </Step>
+  
+  <Step title="Open in Browser">
+    Open `index.html` directly in your web browser:
     
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
+    **Option 1: Double-click the file**
+    - Navigate to the project folder
+    - Double-click `index.html`
+    - The app opens in your default browser
     
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
-
-### Step 2: Deploy your changes
-
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
+    **Option 2: Use a local server (recommended)**
+    ```bash
+    # Python 3
+    python -m http.server 8000
     
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+    # Python 2
+    python -m SimpleHTTPServer 8000
+    
+    # Node.js (if you have npx)
+    npx http-server
+    ```
+    Then visit `http://localhost:8000`
+  </Step>
+  
+  <Step title="Start Exploring">
+    That's it! The application loads and you can immediately:
+    - Search for your favorite Pokémon
+    - Filter by type, generation, or color
+    - Click "Ver más" to see detailed stats
+    - Click the 🔊 button to hear Pokémon cries
+  </Step>
+</Steps>
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+<Info>
+Using a local server instead of opening the file directly ensures all features work correctly, especially if you add custom fonts or external resources.
+</Info>
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+## Exploring the Interface
 
-### Step 3: Go live
+### 1. Search Bar
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+The search bar supports multiple search patterns:
 
-## Next steps
+<CodeGroup>
+```text Search by Name
+pikachu
+charmander
+bulbasaur
+```
 
-Now that you have your docs running, explore these key features:
+```text Search by Type (Spanish or English)
+fuego
+fire
+agua
+water
+```
+
+```text Combined Search
+planta verde    # Green grass-type Pokémon
+fuego pequeño   # Small fire-type Pokémon
+```
+</CodeGroup>
+
+<Tip>
+Start typing and watch the autocomplete suggestions appear! The search requires at least 2 characters.
+</Tip>
+
+### 2. Type Filter
+
+Filter Pokémon by their elemental type:
+
+```html
+<select id="typeFilter">
+    <option value="">Elige el tipo</option>
+    <option value="fire">Fuego</option>
+    <option value="water">Agua</option>
+    <option value="grass">Planta</option>
+    <option value="electric">Eléctrico</option>
+    <!-- 14 more types... -->
+</select>
+```
+
+Available types:
+- Normal, Fire, Water, Electric, Grass, Ice
+- Fighting, Poison, Ground, Flying
+- Psychic, Bug, Rock, Ghost
+- Dragon, Dark, Steel, Fairy
+
+### 3. Generation Filter
+
+Explore Pokémon from specific game generations:
+
+<CardGroup cols={3}>
+  <Card title="Gen I" icon="1">
+    Kanto (1-151)
+  </Card>
+  <Card title="Gen II" icon="2">
+    Johto (152-251)
+  </Card>
+  <Card title="Gen III" icon="3">
+    Hoenn (252-386)
+  </Card>
+  <Card title="Gen IV" icon="4">
+    Sinnoh (387-493)
+  </Card>
+  <Card title="Gen V" icon="5">
+    Unova (494-649)
+  </Card>
+  <Card title="Gen VI" icon="6">
+    Kalos (650-721)
+  </Card>
+  <Card title="Gen VII" icon="7">
+    Alola (722-809)
+  </Card>
+  <Card title="Gen VIII" icon="8">
+    Galar (810-905)
+  </Card>
+  <Card title="Gen IX" icon="9">
+    Paldea (906-1025)
+  </Card>
+</CardGroup>
+
+### 4. Pokémon Cards
+
+Each card displays rich information:
+
+```javascript
+// Card structure from logica.js:586
+createPokemonCard(pokemon) {
+    const card = document.createElement('div');
+    card.className = 'pokemon-card';
+    
+    // Gradient background based on primary type
+    const backgroundGradient = this.constants.typeColors[pokemon.types[0]];
+    
+    card.innerHTML = `
+        <div class="pokemon-card-content">
+            <div class="pokemon-image">
+                <img src="${pokemon.image}" alt="${pokemon.name}">
+                ${pokemon.cry ? `<button class="cry-button">🔊</button>` : ''}
+            </div>
+            <div class="pokemon-name">${pokemon.name}</div>
+            <div class="pokemon-id">#${String(pokemon.id).padStart(3, '0')}</div>
+            <div class="pokemon-types">...</div>
+            <button class="toggle-info">Ver más</button>
+            <div class="extra-info">...</div>
+        </div>
+    `;
+    
+    return card;
+}
+```
+
+**Card features:**
+- **Image**: Official artwork from PokeAPI
+- **Name & ID**: Capitalized name with formatted ID
+- **Type badges**: Color-coded by type
+- **Stats**: HP, Attack, Defense, Speed
+- **Abilities**: Up to 3 abilities with Spanish translations
+- **Physical info**: Height, Weight, Base Experience
+- **Extra data**: Color indicator and habitat (when available)
+
+<Warning>
+The "Ver más" (Show more) toggle button only appears on mobile devices. On desktop, all information is visible by default.
+</Warning>
+
+## Interactive Features
+
+### Hearing Pokémon Cries
+
+<Steps>
+  <Step title="Activate Audio">
+    Click the 🔊 button once on any Pokémon card to enable audio
+  </Step>
+  <Step title="Play Sounds">
+    After activation, hover over any 🔊 button to hear that Pokémon's cry
+  </Step>
+</Steps>
+
+```javascript
+// From logica.js:628
+if (pokemon.cry) {
+    const cryButton = card.querySelector('.cry-button');
+    cryButton.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.playPokemonCry(pokemon.cry, cryButton);
+        this.audioActivated = true;
+    });
+    cryButton.addEventListener('mouseenter', (e) => {
+        if (this.audioActivated) {
+            this.playPokemonCry(pokemon.cry, cryButton);
+        }
+    });
+}
+```
+
+<Info>
+This two-step activation prevents unexpected audio playback while browsing.
+</Info>
+
+### Using the Interactive Tour
+
+Click the **"Guía Interactiva"** button at the top to start a guided tour:
+
+```html
+<!-- From index.html:21 -->
+<button id="startTour" class="tour-button">Guía Interactiva</button>
+```
+
+The tour highlights key features:
+1. **Smart Search**: How to search and use autocomplete
+2. **Advanced Filters**: Using type, generation, and other filters
+3. **Pokémon Cards**: Viewing stats and playing cries
+4. **Pagination**: Navigating through results
+
+### Pagination
+
+Browse through 12 Pokémon at a time:
+
+```javascript
+// From logica.js:116
+this.pokemonPerPage = 12;
+```
+
+<CardGroup cols={3}>
+  <Card title="← Anterior" icon="arrow-left">
+    Go to the previous page
+  </Card>
+  <Card title="Page Numbers" icon="hashtag">
+    Jump directly to a specific page
+  </Card>
+  <Card title="Siguiente →" icon="arrow-right">
+    Go to the next page
+  </Card>
+</CardGroup>
+
+## Example Workflows
+
+### Find All Fire-Type Pokémon from Gen I
+
+<Steps>
+  <Step title="Select Type">
+    Choose "Fuego" (Fire) from the Type Filter dropdown
+  </Step>
+  <Step title="Select Generation">
+    Choose "Gen I - Kanto (1-151)" from the Generation Filter
+  </Step>
+  <Step title="Browse Results">
+    See Charmander, Charmeleon, Charizard, Vulpix, Ninetales, Growlithe, Arcanine, Ponyta, Rapidash, Moltres
+  </Step>
+</Steps>
+
+### Search for Blue Water Pokémon
+
+```text
+Step 1: Type in search bar: "agua azul"
+Step 2: Press Enter or wait for auto-search
+Step 3: View results filtered by water type and blue color
+```
+
+### Explore Dragon Types
+
+<Steps>
+  <Step title="Filter by Type">
+    Select "Dragón" from Type Filter
+  </Step>
+  <Step title="View Stats">
+    Click "Ver más" on mobile or simply view on desktop
+  </Step>
+  <Step title="Compare">
+    Notice the purple gradient background specific to Dragon types
+  </Step>
+</Steps>
+
+<Tip>
+Type-based background gradients make it easy to visually identify Pokémon types at a glance.
+</Tip>
+
+## Performance Tips
 
 <CardGroup cols={2}>
+  <Card title="First Load" icon="clock">
+    Initial load fetches 24 Pokémon for instant display
+  </Card>
+  <Card title="Smart Caching" icon="database">
+    All fetched data is cached for instant re-filtering
+  </Card>
+  <Card title="Batch Loading" icon="layer-group">
+    Large filters load in batches of 50 to prevent UI freeze
+  </Card>
+  <Card title="Lazy Details" icon="eye">
+    Species data (color/habitat) loads on-demand
+  </Card>
+</CardGroup>
 
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
+```javascript
+// From logica.js:281
+const batchSize = 50;
+for (let i = 0; i < needed.length; i += batchSize) {
+    const batch = needed.slice(i, i + batchSize);
+    const newPokemon = await Promise.all(
+        batch.map(p => this.fetchPokemonDetails(p))
+    );
+}
+```
 
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
+## Next Steps
 
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+<CardGroup cols={2}>
+  <Card title="Installation Guide" icon="download" href="/installation">
+    Set up a development environment and customize the app
+  </Card>
+  <Card title="Project Structure" icon="folder" href="/introduction#project-structure">
+    Learn about the codebase architecture
+  </Card>
 </CardGroup>
 
 <Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
+Ready to dive deeper? Check out the [Installation guide](/installation) to set up your development environment and start customizing Pokémon Explorer.
 </Note>

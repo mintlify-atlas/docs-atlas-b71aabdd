@@ -1,0 +1,267 @@
+---
+title: "Pagination"
+description: "Navigate through large result sets with intuitive pagination controls"
+---
+
+## Overview
+
+Pokémon Explorer uses a pagination system to display search results in manageable chunks, showing 12 Pokémon per page by default.
+
+## Pagination Configuration
+
+```javascript logica.js
+Object.assign(this, {
+    currentPage: 1,
+    pokemonPerPage: 12,
+    allPokemon: [],
+    filteredPokemon: []
+});
+```
+
+<Info>
+The default page size is 12 Pokémon, which creates a nice 3x4 or 4x3 grid depending on screen size.
+</Info>
+
+## Display Logic
+
+The `displayPokemon()` method handles pagination:
+
+```javascript logica.js
+displayPokemon() {
+    const { pokemonGrid, noResults } = this.elements;
+    const startIndex = (this.currentPage - 1) * this.pokemonPerPage;
+    const pokemonToShow = this.filteredPokemon.slice(startIndex, startIndex + this.pokemonPerPage);
+
+    pokemonGrid.style.display = pokemonToShow.length ? 'grid' : 'none';
+    noResults.style.display = pokemonToShow.length ? 'none' : 'block';
+    pokemonGrid.innerHTML = '';
+
+    pokemonToShow.forEach((pokemon, index) => {
+        const card = this.createPokemonCard(pokemon);
+        card.style.animationDelay = `${index * 0.1}s`;
+        pokemonGrid.appendChild(card);
+    });
+}
+```
+
+<Note>
+Only the Pokémon for the current page are rendered to the DOM, improving performance for large result sets.
+</Note>
+
+## Pagination Controls
+
+The `updatePagination()` method creates the navigation controls:
+
+```javascript logica.js
+updatePagination() {
+    const { pagination } = this.elements;
+    const totalPages = Math.ceil(this.filteredPokemon.length / this.pokemonPerPage);
+    pagination.innerHTML = '';
+
+    if (totalPages <= 1) return;
+
+    const createBtn = (text, disabled, onClick) => {
+        const btn = document.createElement('button');
+        btn.textContent = text;
+        btn.disabled = disabled;
+        btn.addEventListener('click', onClick);
+        return btn;
+    };
+
+    // Previous button
+    pagination.appendChild(createBtn('← Anterior', this.currentPage === 1, () => {
+        if (this.currentPage > 1) {
+            this.currentPage--;
+            this.displayPokemon();
+            this.updatePagination();
+        }
+    }));
+
+    // Page number buttons
+    const startPage = Math.max(1, this.currentPage - 2);
+    const endPage = Math.min(totalPages, startPage + 4);
+
+    for (let i = startPage; i <= endPage; i++) {
+        const pageBtn = createBtn(i, false, () => {
+            this.currentPage = i;
+            this.displayPokemon();
+            this.updatePagination();
+        });
+        if (i === this.currentPage) {
+            pageBtn.classList.add('active');
+        }
+        pagination.appendChild(pageBtn);
+    }
+
+    // Next button
+    pagination.appendChild(createBtn('Siguiente →', this.currentPage === totalPages, () => {
+        if (this.currentPage < totalPages) {
+            this.currentPage++;
+            this.displayPokemon();
+            this.updatePagination();
+        }
+    }));
+}
+```
+
+## Pagination Features
+
+<CardGroup cols={2}>
+  <Card title="Previous/Next Buttons" icon="arrows-left-right">
+    Navigate to adjacent pages with ← Anterior and Siguiente → buttons
+  </Card>
+  <Card title="Page Numbers" icon="list-ol">
+    Jump directly to a specific page by clicking its number
+  </Card>
+  <Card title="Smart Windowing" icon="window-maximize">
+    Shows up to 5 page numbers at a time, centered on current page
+  </Card>
+  <Card title="Active State" icon="check">
+    Current page is highlighted with the 'active' class
+  </Card>
+  <Card title="Auto-Hide" icon="eye-slash">
+    Pagination controls hide when there's only one page
+  </Card>
+  <Card title="Disabled States" icon="ban">
+    Previous/Next buttons disable at boundaries
+  </Card>
+</CardGroup>
+
+## Page Window Calculation
+
+The pagination shows a sliding window of page numbers:
+
+```javascript logica.js
+const startPage = Math.max(1, this.currentPage - 2);
+const endPage = Math.min(totalPages, startPage + 4);
+```
+
+<Steps>
+  <Step title="Calculate Start">
+    Start at current page minus 2, but never below 1
+  </Step>
+  <Step title="Calculate End">
+    Show 5 pages total (start + 4), but never exceed total pages
+  </Step>
+  <Step title="Render Buttons">
+    Create buttons for each page in the window
+  </Step>
+</Steps>
+
+## Examples
+
+### Small Result Set (1 page)
+
+```
+Total Pokémon: 8
+Pages: 1
+Controls: [Hidden]
+```
+
+### Medium Result Set (3 pages)
+
+```
+Total Pokémon: 30
+Pages: 3
+Controls: [← Anterior] [1] [2] [3] [Siguiente →]
+```
+
+### Large Result Set (15 pages, on page 7)
+
+```
+Total Pokémon: 180
+Pages: 15
+Current Page: 7
+Controls: [← Anterior] [5] [6] [7] [8] [9] [Siguiente →]
+```
+
+<Info>
+The window always tries to show 5 page numbers, centered around the current page.
+</Info>
+
+## Page Reset Behavior
+
+The page resets to 1 when:
+
+1. **New Search**: User performs a search
+2. **Filter Applied**: Any filter is changed
+3. **Smart Search**: Multi-criteria search is executed
+
+```javascript logica.js
+// In performNameSearch
+this.filteredPokemon = found;
+this.currentPage = 1;
+this.displayPokemon();
+this.updatePagination();
+
+// In applyFilters
+this.currentPage = 1;
+this.clearError();
+this.displayPokemon();
+this.updatePagination();
+```
+
+<Warning>
+Changing any filter or performing a new search will reset you to page 1.
+</Warning>
+
+## Performance Considerations
+
+<AccordionGroup>
+  <Accordion title="Efficient Rendering">
+    Only 12 Pokémon cards are rendered at a time, regardless of total results. This keeps DOM size manageable and improves performance.
+  </Accordion>
+  
+  <Accordion title="Array Slicing">
+    JavaScript's `slice()` method is used to extract the current page's Pokémon:
+    ```javascript
+    const startIndex = (this.currentPage - 1) * this.pokemonPerPage;
+    const pokemonToShow = this.filteredPokemon.slice(startIndex, startIndex + this.pokemonPerPage);
+    ```
+    This is an O(n) operation but n is always 12, making it constant time in practice.
+  </Accordion>
+  
+  <Accordion title="Button Creation">
+    Pagination buttons are recreated on each page change. For result sets with hundreds of pages, this could be optimized by maintaining a button pool.
+  </Accordion>
+</AccordionGroup>
+
+## User Experience Features
+
+<CardGroup cols={2}>
+  <Card title="Visual Feedback" icon="eye">
+    Active page is visually distinct with the 'active' class
+  </Card>
+  <Card title="Disabled States" icon="lock">
+    Previous/Next buttons are disabled at boundaries to prevent invalid navigation
+  </Card>
+  <Card title="Keyboard Navigation" icon="keyboard">
+    Buttons can be navigated with Tab and activated with Enter/Space
+  </Card>
+  <Card title="No Results Handling" icon="circle-xmark">
+    When no Pokémon match filters, pagination hides and a "No results" message displays
+  </Card>
+</CardGroup>
+
+<Tip>
+For the best experience, keep your search criteria specific enough to avoid too many pages. Most users won't navigate beyond page 3-4.
+</Tip>
+
+## Integration with Other Features
+
+Pagination works seamlessly with:
+
+- **Search**: Results are paginated automatically
+- **Filters**: Filtered results update pagination
+- **Smart Search**: Multi-criteria searches respect pagination
+- **Loading States**: Pagination updates after data loads
+
+```javascript logica.js
+// Example: Filter application updates pagination
+async applyFilters() {
+    // ... filter logic ...
+    this.currentPage = 1;
+    this.displayPokemon();
+    this.updatePagination();
+}
+```

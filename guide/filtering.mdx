@@ -1,0 +1,270 @@
+---
+title: Using Filters
+description: Master the dropdown filter system to narrow down Pokémon by type, generation, color, habitat, size, and weight
+---
+
+The Pokémon Explorer features a comprehensive filter system that lets you narrow down the Pokédex using multiple criteria. Unlike the search bar which uses keywords, filters provide dropdown menus for precise selection.
+
+## Accessing Filters
+
+The filter section is located directly below the search bar, containing six dropdown menus:
+
+- **Type Filter** - Filter by elemental type
+- **Generation Filter** - Filter by game generation (I-IX)
+- **Color Filter** - Filter by primary color
+- **Habitat Filter** - Filter by natural habitat
+- **Size Filter** - Filter by height category
+- **Weight Filter** - Filter by weight category
+
+<Info>
+  All filters work together! Select multiple filters to create very specific searches.
+</Info>
+
+## Type Filter
+
+The type filter allows you to view Pokémon of a specific elemental type.
+
+<Steps>
+  <Step title="Click the Type Dropdown">
+    Select the dropdown labeled "Elige el tipo" (Choose type)
+  </Step>
+  
+  <Step title="Choose a Type">
+    Select from 18 available types:
+    - Normal, Fuego (Fire), Agua (Water), Eléctrico (Electric)
+    - Planta (Grass), Hielo (Ice), Lucha (Fighting), Veneno (Poison)
+    - Tierra (Ground), Volador (Flying), Psíquico (Psychic), Bicho (Bug)
+    - Roca (Rock), Fantasma (Ghost), Dragón (Dragon), Siniestro (Dark)
+    - Acero (Steel), Hada (Fairy)
+  </Step>
+  
+  <Step title="View Results">
+    The Pokédex automatically updates to show only Pokémon of the selected type
+  </Step>
+</Steps>
+
+<Note>
+  When you select a type for the first time, the app loads all Pokémon of that type from the PokeAPI. This may take a moment for types with many Pokémon.
+</Note>
+
+**Type Filter Features:**
+- Common types appear first in the dropdown for convenience
+- Shows all Pokémon with the selected type (including dual-types)
+- Loads on-demand for better performance
+
+## Generation Filter
+
+Filter Pokémon by the generation (game release era) they were introduced in.
+
+**Available Generations:**
+
+<CardGroup cols={3}>
+  <Card title="Generation I" icon="1">
+    Pokémon #1-151 (Kanto region)
+  </Card>
+  <Card title="Generation II" icon="2">
+    Pokémon #152-251 (Johto region)
+  </Card>
+  <Card title="Generation III" icon="3">
+    Pokémon #252-386 (Hoenn region)
+  </Card>
+  <Card title="Generation IV" icon="4">
+    Pokémon #387-493 (Sinnoh region)
+  </Card>
+  <Card title="Generation V" icon="5">
+    Pokémon #494-649 (Unova region)
+  </Card>
+  <Card title="Generation VI" icon="6">
+    Pokémon #650-721 (Kalos region)
+  </Card>
+  <Card title="Generation VII" icon="7">
+    Pokémon #722-809 (Alola region)
+  </Card>
+  <Card title="Generation VIII" icon="8">
+    Pokémon #810-905 (Galar region)
+  </Card>
+  <Card title="Generation IX" icon="9">
+    Pokémon #906-1025 (Paldea region)
+  </Card>
+</CardGroup>
+
+<Tip>
+  First-time players? Start with Generation I to see the original 151 Pokémon!
+</Tip>
+
+**How It Works:**
+- When you select a generation, the app loads all Pokémon within that ID range
+- The filter uses Pokédex numbers to determine generation membership
+- Loading a generation for the first time fetches data from the API
+
+## Color Filter
+
+Find Pokémon based on their official color classification from the Pokémon games.
+
+**Available Colors:**
+- Negro (Black)
+- Azul (Blue)
+- Marrón (Brown)
+- Gris (Gray)
+- Verde (Green)
+- Rosa (Pink)
+- Morado (Purple)
+- Rojo (Red)
+- Blanco (White)
+- Amarillo (Yellow)
+
+<Note>
+  Color data comes from the Pokémon species data in the PokeAPI. Some Pokémon may not have color information available.
+</Note>
+
+**Example Use Cases:**
+- Find all blue Water-type Pokémon
+- Discover rare purple Pokémon
+- Build a team based on color theme
+
+## Habitat Filter
+
+Discover Pokémon by their natural habitat or environment.
+
+**Available Habitats:**
+- Cueva (Cave)
+- Bosque (Forest)
+- Pradera (Grassland)
+- Montaña (Mountain)
+- Raro (Rare)
+- Terreno Áspero (Rough Terrain)
+- Mar (Sea)
+- Urbano (Urban)
+- Orilla del Agua (Water's Edge)
+
+<Accordion title="What does 'Raro' (Rare) mean?">
+  Rare habitat indicates Pokémon that don't have a standard natural habitat, often legendary or mythical Pokémon.
+</Accordion>
+
+## Size Filter
+
+Filter Pokémon by height category.
+
+**Size Categories:**
+
+| Category | Height Range | Examples |
+|----------|--------------|----------|
+| Tiny (Muy pequeño) | < 0.5m | Joltik, Flabébé |
+| Small (Pequeño) | 0.5m - 1m | Pikachu, Eevee |
+| Medium (Mediano) | 1m - 2m | Charizard, Lucario |
+| Large (Grande) | 2m - 3m | Tyranitar, Dragonite |
+| Huge (Enorme) | > 3m | Onix, Rayquaza |
+
+<Info>
+  Height is measured in meters and comes from official Pokémon game data.
+</Info>
+
+## Weight Filter
+
+Filter Pokémon by weight class.
+
+**Weight Categories:**
+
+| Category | Weight Range | Examples |
+|----------|--------------|----------|
+| Light (Ligero) | < 10kg | Pidgey, Caterpie |
+| Normal | 10kg - 50kg | Most starter Pokémon |
+| Heavy (Pesado) | 50kg - 100kg | Snorlax, Steelix |
+| Massive (Masivo) | > 100kg | Groudon, Dialga |
+
+## Combining Multiple Filters
+
+The real power of the filter system comes from combining multiple filters together.
+
+<Steps>
+  <Step title="Select First Filter">
+    Choose your primary criterion (e.g., Type: Fuego)
+  </Step>
+  
+  <Step title="Add Additional Filters">
+    Select additional filters to narrow results (e.g., Color: Rojo, Size: Grande)
+  </Step>
+  
+  <Step title="View Combined Results">
+    The Pokédex shows only Pokémon matching ALL selected filters
+  </Step>
+</Steps>
+
+**Example Combinations:**
+
+<CardGroup cols={2}>
+  <Card title="Tiny Water Pokémon">
+    Type: Agua + Size: Muy pequeño
+    
+    Find the smallest water dwellers
+  </Card>
+  <Card title="Gen I Fire Types">
+    Generation: 1 + Type: Fuego
+    
+    Classic fire starters and more
+  </Card>
+  <Card title="Heavy Rock Pokémon">
+    Type: Roca + Weight: Masivo
+    
+    Discover the heaviest rock types
+  </Card>
+  <Card title="Urban Normal Types">
+    Type: Normal + Habitat: Urbano
+    
+    City-dwelling Pokémon
+  </Card>
+</CardGroup>
+
+## Filter Behavior
+
+<Accordion title="How do filters interact with search?">
+  When you use both search and filters:
+  - Search criteria are applied first
+  - Then filters narrow down those results
+  - Clear the search to use only filters
+</Accordion>
+
+<Accordion title="Why do some filters load slowly?">
+  - First-time filter selections may load data from the API
+  - Type and generation filters load larger datasets
+  - Subsequent uses of the same filter are cached and instant
+  - Color and habitat filters use pre-loaded species data
+</Accordion>
+
+<Accordion title="What happens if no Pokémon match?">
+  - A "No results" message appears
+  - The Pokémon grid will be empty
+  - Try removing one or more filters to broaden your search
+</Accordion>
+
+## Clearing Filters
+
+To reset all filters and view the complete Pokédex:
+
+<Steps>
+  <Step title="Method 1: Manual Reset">
+    Set each dropdown back to its default option:
+    - "Elige el tipo" for Type
+    - "Todos los colores" for Color
+    - Etc.
+  </Step>
+  
+  <Step title="Method 2: Clear All Button">
+    Click the "Clear Filters" button in the filters section to reset everything at once
+  </Step>
+</Steps>
+
+<Tip>
+  The filter section remembers your selections as you browse through pages, making it easy to explore large result sets.
+</Tip>
+
+## Performance Tips
+
+- **Start broad, then narrow**: Begin with one filter and add more to refine
+- **Use generation filter wisely**: Loading all 9 generations takes time; select specific ones
+- **Combine size/weight with type**: Creates interesting, focused result sets
+- **Cache benefits**: Once data is loaded, filter changes are instant
+
+<Note>
+  Filters persist while browsing paginated results, so you can explore all matching Pokémon across multiple pages.
+</Note>

@@ -1,0 +1,222 @@
+---
+title: 'Translations'
+description: 'Spanish translations for Pokemon types, abilities, colors, and habitats'
+---
+
+## Overview
+
+The translations configuration provides Spanish language mappings for Pokemon-related terms. These are used to display localized content throughout the application.
+
+## Type Translations
+
+### typeTranslations
+
+Maps English Pokemon type names to their Spanish equivalents.
+
+```javascript
+typeTranslations: {
+    'normal': 'Normal',
+    'fire': 'Fuego',
+    'water': 'Agua',
+    'electric': 'Eléctrico',
+    'grass': 'Planta',
+    'ice': 'Hielo',
+    'fighting': 'Lucha',
+    'poison': 'Veneno',
+    'ground': 'Tierra',
+    'flying': 'Volador',
+    'psychic': 'Psíquico',
+    'bug': 'Bicho',
+    'rock': 'Roca',
+    'ghost': 'Fantasma',
+    'dragon': 'Dragón',
+    'dark': 'Siniestro',
+    'steel': 'Acero',
+    'fairy': 'Hada'
+}
+```
+
+**Structure:**
+- **Key**: English type name (lowercase)
+- **Value**: Spanish type name (capitalized)
+- **Total entries**: 18 types
+
+## Ability Translations
+
+### abilityTranslations
+
+Maps English Pokemon ability names to their Spanish equivalents. This is a comprehensive dictionary covering abilities from all generations.
+
+<CodeGroup>
+```javascript Generation 1-3 Examples
+{
+    'overgrow': 'Espesura',
+    'blaze': 'Llamarada',
+    'torrent': 'Torrente',
+    'shield-dust': 'Polvo Escudo',
+    'run-away': 'Fuga',
+    'keen-eye': 'Vista Lince',
+    'guts': 'Agallas',
+    'intimidate': 'Intimidación',
+    'static': 'Electricidad Estática',
+    'lightning-rod': 'Pararrayos'
+}
+```
+
+```javascript Generation 4-6 Examples
+{
+    'adaptability': 'Adaptabilidad',
+    'skill-link': 'Encadenado',
+    'hydration': 'Hidratación',
+    'quick-feet': 'Pies Rápidos',
+    'normalize': 'Normalidad',
+    'wonder-guard': 'Superguarda',
+    'protean': 'Mutatipo',
+    'fur-coat': 'Pelaje Recio',
+    'magician': 'Prestidigitador',
+    'bulletproof': 'Antibalas'
+}
+```
+
+```javascript Generation 7-9 Examples
+{
+    'electric-surge': 'Campo Eléctrico',
+    'psychic-surge': 'Campo Psíquico',
+    'cotton-down': 'Pelusa',
+    'mirror-armor': 'Coraza Espejo',
+    'steam-engine': 'Combustible',
+    'protosynthesis': 'Protosíntesis',
+    'quark-drive': 'Propulsión Cuark',
+    'good-as-gold': 'Cuerpo Áureo',
+    'earth-eater': 'Geofagia',
+    'mycelium-might': 'Poder Fúngico'
+}
+```
+</CodeGroup>
+
+**Structure:**
+- **Key**: English ability name (lowercase, kebab-case)
+- **Value**: Spanish ability name (title case)
+- **Total entries**: 200+ abilities
+
+<Note>
+The ability translations cover all generations from Gen 1 through Gen 9, including the latest abilities from Pokemon Scarlet and Violet.
+</Note>
+
+## Color Translations
+
+### colorTranslations
+
+Maps English Pokemon color names to their Spanish equivalents.
+
+```javascript
+colorTranslations: {
+    'black': 'Negro',
+    'blue': 'Azul',
+    'brown': 'Marrón',
+    'gray': 'Gris',
+    'green': 'Verde',
+    'pink': 'Rosa',
+    'purple': 'Morado',
+    'red': 'Rojo',
+    'white': 'Blanco',
+    'yellow': 'Amarillo'
+}
+```
+
+**Structure:**
+- **Key**: English color name (lowercase)
+- **Value**: Spanish color name (capitalized)
+- **Total entries**: 10 colors
+
+## Habitat Translations
+
+### habitatTranslations
+
+Maps English Pokemon habitat names to their Spanish equivalents.
+
+```javascript
+habitatTranslations: {
+    'cave': 'Cueva',
+    'forest': 'Bosque',
+    'grassland': 'Pradera',
+    'mountain': 'Montaña',
+    'rare': 'Raro',
+    'rough-terrain': 'Terreno Áspero',
+    'sea': 'Mar',
+    'urban': 'Urbano',
+    'waters-edge': 'Orilla del Agua'
+}
+```
+
+**Structure:**
+- **Key**: English habitat name (lowercase, kebab-case)
+- **Value**: Spanish habitat name (capitalized)
+- **Total entries**: 9 habitats
+
+## Usage Examples
+
+<AccordionGroup>
+<Accordion title="Translating Pokemon Types">
+```javascript
+const pokemonType = 'fire';
+const spanishType = constants.typeTranslations[pokemonType];
+console.log(spanishType); // 'Fuego'
+
+// Display all types in Spanish
+const types = ['fire', 'water', 'grass'];
+const translatedTypes = types.map(type => constants.typeTranslations[type]);
+// ['Fuego', 'Agua', 'Planta']
+```
+</Accordion>
+
+<Accordion title="Translating Pokemon Abilities">
+```javascript
+const ability = 'overgrow';
+const spanishAbility = constants.abilityTranslations[ability];
+console.log(spanishAbility); // 'Espesura'
+
+// Handle missing translations
+const getTranslatedAbility = (ability) => {
+    return constants.abilityTranslations[ability] || ability;
+};
+```
+</Accordion>
+
+<Accordion title="Translating Colors and Habitats">
+```javascript
+// Translate Pokemon color
+const color = 'blue';
+const spanishColor = constants.colorTranslations[color];
+console.log(spanishColor); // 'Azul'
+
+// Translate Pokemon habitat
+const habitat = 'forest';
+const spanishHabitat = constants.habitatTranslations[habitat];
+console.log(spanishHabitat); // 'Bosque'
+```
+</Accordion>
+
+<Accordion title="Complete Translation Example">
+```javascript
+// Translate all Pokemon data to Spanish
+function translatePokemonData(pokemon) {
+    return {
+        name: pokemon.name,
+        types: pokemon.types.map(t => 
+            constants.typeTranslations[t] || t
+        ),
+        abilities: pokemon.abilities.map(a => 
+            constants.abilityTranslations[a] || a
+        ),
+        color: constants.colorTranslations[pokemon.color] || pokemon.color,
+        habitat: constants.habitatTranslations[pokemon.habitat] || pokemon.habitat
+    };
+}
+```
+</Accordion>
+</AccordionGroup>
+
+<Note>
+All translation values use proper Spanish capitalization and include accented characters where appropriate (e.g., "Eléctrico", "Psíquico", "Dragón").
+</Note>

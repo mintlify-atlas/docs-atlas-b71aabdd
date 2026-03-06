@@ -1,0 +1,341 @@
+---
+title: Interactive Tour
+description: Learn about the built-in interactive tour feature that guides you through all major Pokédex features
+---
+
+Pokémon Explorer includes a built-in interactive tour that walks you through all the main features of the application. The tour uses a custom-built `PokemonTour` class to provide an engaging, step-by-step introduction.
+
+## Starting the Tour
+
+The interactive tour can be launched from the main interface.
+
+<Steps>
+  <Step title="Find the Tour Button">
+    Look for the "Start Tour" button, typically located in the header or welcome section of the page
+  </Step>
+  
+  <Step title="Click to Begin">
+    Click the button labeled "Iniciar Tour" or "Start Tour"
+  </Step>
+  
+  <Step title="Tour Initializes">
+    The tour system will:
+    - Load initial Pokémon data if needed
+    - Display a preparation message
+    - Activate the tour overlay
+  </Step>
+</Steps>
+
+<Note>
+  If the Pokédex is empty when you start the tour, the system automatically loads 25 Pokémon to demonstrate all features properly.
+</Note>
+
+## Tour Interface
+
+When the tour is active, you'll see several interface elements:
+
+### Overlay
+
+- A semi-transparent dark overlay covers the page
+- Clicking the overlay closes the tour
+- The currently highlighted element remains visible and interactive
+
+### Tour Popup
+
+The popup window contains:
+
+- **Title** - Descriptive title with emoji for each step
+- **Description** - Detailed explanation of the feature
+- **Close Button (✕)** - Exit the tour at any time
+- **Progress Indicator** - Shows current step (e.g., "2 of 5")
+- **Navigation Buttons**:
+  - ← Previous (goes back one step)
+  - → Next (advances one step)
+  - OK (finishes the tour on the last step)
+
+### Element Highlighting
+
+The tour highlights specific page elements:
+
+- Highlighted element has a special CSS class `tour-highlighted`
+- Element automatically scrolls into view
+- Popup positions itself near the highlighted element
+- Arrow points from popup to the element
+
+## Tour Steps
+
+The interactive tour consists of 5 main steps:
+
+<Steps>
+  <Step title="Step 1: Smart Search 🔍">
+    **Element Highlighted**: Search section (#search-section)
+    
+    Explains how to:
+    - Search Pokémon by name (e.g., "pikachu")
+    - Search by type (e.g., "fuego")
+    - Search by color (e.g., "rojo")
+    - Combine criteria (e.g., "planta verde")
+    
+    The popup appears near the search input area with an arrow pointing to it.
+  </Step>
+  
+  <Step title="Step 2: Advanced Filters ⚡">
+    **Element Highlighted**: Filters section (#filters-section)
+    
+    Introduces the dropdown filters:
+    - Type filter
+    - Generation filter
+    - Color filter
+    - Habitat filter
+    - Size filter
+    - Weight filter
+    
+    The popup positions itself near the filter dropdowns.
+  </Step>
+  
+  <Step title="Step 3: Pokémon Cards 🎴">
+    **Element Highlighted**: Pokémon grid (#pokemonGrid)
+    
+    Shows you:
+    - How cards display Pokémon information
+    - The "Ver más" (View more) button for expanded details
+    - Statistics, abilities, and characteristics
+    - The 🔊 button for hearing Pokémon cries
+    
+    The popup appears near the grid of Pokémon cards.
+  </Step>
+  
+  <Step title="Step 4: Pagination 📄">
+    **Element Highlighted**: Pagination controls (#pagination)
+    
+    Explains:
+    - How to navigate between pages
+    - Previous/Next buttons
+    - Direct page number selection
+    - When pagination appears (multiple pages of results)
+    
+    The popup points to the pagination section at the bottom.
+  </Step>
+  
+  <Step title="Step 5: Ready to Explore! 🎉">
+    **Element Highlighted**: Entire page (body)
+    
+    Final encouragement:
+    - You've learned all the basics
+    - Ready to become a Pokémon Master
+    - Enjoy exploring the Pokédex
+    
+    The popup is centered on the screen with no arrow.
+  </Step>
+</Steps>
+
+## Navigation Controls
+
+You have full control over the tour pace:
+
+### Moving Forward
+
+- Click the **→** (Next) button
+- Advances to the next step
+- Available on steps 1-4
+- On step 5, this button is hidden
+
+### Moving Backward
+
+- Click the **←** (Previous) button
+- Returns to the previous step
+- Available on steps 2-5
+- Hidden on step 1 (first step)
+
+### Finishing the Tour
+
+- Click the **OK** button (visible only on step 5)
+- Or click the **✕** close button at any time
+- Or click the overlay background
+
+All methods close the tour and return you to normal browsing.
+
+## Tour Behavior
+
+### Automatic Scrolling
+
+<Info>
+  When you navigate to a new step, the highlighted element automatically scrolls into view smoothly, ensuring you can always see what's being explained.
+</Info>
+
+### Smart Positioning
+
+The popup intelligently positions itself:
+
+1. **Priority order**: Bottom → Top → Right → Left
+2. **Stays on screen**: Adjusts if it would go off-screen
+3. **Arrow positioning**: Points to the highlighted element
+4. **Fallback**: Centers on screen if element is not visible
+
+### Data Loading
+
+If the tour starts before Pokémon are loaded:
+
+- Shows a loading step: "⏳ Preparando la Guía Interactiva"
+- Loads 25 initial Pokémon automatically
+- Progress indicator shows "Preparando..."
+- Navigation buttons are hidden during loading
+- Tour begins automatically once data is ready
+
+## Visual Effects
+
+### Tour Overlay Animation
+
+- Fades in smoothly when tour starts
+- Has CSS class `active` during the tour
+- Fades out when tour closes
+
+### Popup Animation
+
+- Slides in with fade effect
+- Has CSS class `visible` when displayed
+- Transitions smoothly between steps
+- Slides out when closing
+
+### Highlighted Elements
+
+- CSS class `tour-highlighted` applied to current element
+- Visual styling makes element stand out
+- Previous highlights are removed when moving to next step
+
+### Page State
+
+- Body receives class `tour-in-progress`
+- Allows for global styling changes during tour
+- Removed when tour ends
+
+## Closing the Tour
+
+The tour can be closed multiple ways:
+
+<Accordion title="Click the X Button">
+  The **✕** button in the top-right of the popup closes the tour immediately from any step.
+</Accordion>
+
+<Accordion title="Click the Overlay">
+  Clicking the dark background outside the popup dismisses the tour.
+</Accordion>
+
+<Accordion title="Click OK on Final Step">
+  The **OK** button appears on step 5 (the last step) and completes the tour.
+</Accordion>
+
+<Accordion title="What happens when I close?">
+  - Popup fades out and is removed
+  - Overlay fades out and is removed
+  - All highlights are cleared
+  - Page scrolls back to top smoothly
+  - `tour-in-progress` class is removed from body
+  - Normal browsing resumes
+</Accordion>
+
+## Tour Technical Details
+
+For developers or curious users:
+
+### PokemonTour Class
+
+The tour is implemented in the `PokemonTour` class (lines 829-1064 in logica.js):
+
+- **Constructor**: Defines the 5 tour steps with element selectors, titles, and descriptions
+- **start()**: Initializes the tour, loads data if needed, creates UI elements
+- **showStep()**: Displays the current step with highlighting and positioning
+- **nextStep()/previousStep()**: Navigation between steps
+- **close()**: Cleanup and tour dismissal
+
+### Initialization
+
+The tour is initialized by the `initializeTourNew()` function (line 1066), which:
+
+- Creates a new `PokemonTour` instance
+- Connects it to the "Start Tour" button
+- Makes it available globally as `window.pokemonTour`
+
+### Key Methods
+
+- `highlightElement()` - Adds highlighting to current element
+- `removeHighlight()` - Clears previous highlights
+- `positionPopup()` - Smart positioning logic
+- `centerPopup()` - Fallback centering for unavailable elements
+- `showLoadingStep()` - Special loading state
+
+## Customization
+
+<Tip>
+  Developers can customize the tour by modifying the `steps` array in the PokemonTour constructor. Each step requires an element selector, title, and description.
+</Tip>
+
+### Step Configuration
+
+Each step object contains:
+
+```javascript
+{
+  element: '#css-selector',  // Element to highlight
+  title: '🔍 Title',          // Step title with emoji
+  description: 'Explanation'  // What this feature does
+}
+```
+
+## Accessibility
+
+- Tour uses semantic HTML structure
+- Buttons have clear text labels
+- Progress indicator keeps users oriented
+- Tour can be dismissed at any time
+- Highlighted elements remain interactive
+
+## Mobile Considerations
+
+<Note>
+  While the tour works on mobile devices, the experience is optimized for desktop/tablet screens where there's more room for the popup and highlighted elements.
+</Note>
+
+On mobile:
+
+- Popup may take more screen space
+- Some positioning adjustments may occur
+- Touch interactions work for navigation
+- Scrolling still functions automatically
+
+## Tips for Using the Tour
+
+<CardGroup cols={2}>
+  <Card title="Take Your Time">
+    Read each step carefully to understand all features
+    
+    Use Previous button to review steps
+  </Card>
+  <Card title="Try It Live">
+    The highlighted elements are interactive during the tour
+    
+    Experiment with features as they're explained
+  </Card>
+  <Card title="Restart Anytime">
+    You can close and restart the tour whenever you want
+    
+    Perfect for refreshing your memory
+  </Card>
+  <Card title="Share with Friends">
+    Great introduction for new users
+    
+    Makes onboarding easy and fun
+  </Card>
+</CardGroup>
+
+## When to Use the Tour
+
+- **First time visiting** - Get oriented quickly
+- **After updates** - Learn about new features
+- **Showing someone** - Demonstrate the app's capabilities
+- **Quick refresher** - Remember how filters work
+- **Troubleshooting** - Verify you're using features correctly
+
+<Info>
+  The tour is designed to be non-intrusive and helpful. It respects your time and allows you to exit at any moment while providing a comprehensive overview of all major features.
+</Info>

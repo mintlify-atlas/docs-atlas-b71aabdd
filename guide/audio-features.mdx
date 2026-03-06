@@ -1,0 +1,240 @@
+---
+title: Audio Features
+description: Learn how to activate and use Pokémon cry audio playback in the Pokédex
+---
+
+Pokémon Explorer includes an immersive audio feature that lets you hear the actual cries of Pokémon directly from the official Pokémon game data. Each Pokémon card can play its unique cry sound.
+
+## Finding the Audio Button
+
+The audio feature is accessible from each Pokémon card in the grid.
+
+<Steps>
+  <Step title="Locate a Pokémon Card">
+    Browse or search for Pokémon to display cards in the grid
+  </Step>
+  
+  <Step title="Find the Speaker Icon">
+    Look for the 🔊 button in the top-right corner of the Pokémon's image area
+  </Step>
+  
+  <Step title="Check Availability">
+    Not all Pokémon have cry data available. If you don't see a 🔊 button, that Pokémon's cry is not available in the API
+  </Step>
+</Steps>
+
+<Note>
+  The speaker button only appears on Pokémon cards where cry audio data is available from the PokeAPI.
+</Note>
+
+## Activating Audio
+
+For security and user experience reasons, browsers require user interaction before playing audio. The first time you want to hear a Pokémon cry, you must activate the audio system.
+
+<Steps>
+  <Step title="First Click to Activate">
+    Click the 🔊 button on any Pokémon card
+    
+    This click serves two purposes:
+    - Activates the audio system (required by browsers)
+    - Plays the Pokémon's cry immediately
+  </Step>
+  
+  <Step title="Button Changes">
+    When playing, the button temporarily changes to 🎵 to indicate active playback
+  </Step>
+  
+  <Step title="Audio Activation Confirmed">
+    Once activated, hover functionality is now enabled for all Pokémon cries
+  </Step>
+</Steps>
+
+<Info>
+  You only need to click once to activate audio for the entire session. After that, you can use hover to play cries!
+</Info>
+
+## Playing Pokémon Cries
+
+Once audio is activated, there are two ways to play Pokémon cries:
+
+### Method 1: Click to Play
+
+- Click the 🔊 button on any Pokémon card
+- The cry plays immediately
+- Button shows 🎵 during playback
+- Button returns to 🔊 when finished
+
+### Method 2: Hover to Play (After Activation)
+
+<Steps>
+  <Step title="Ensure Audio is Activated">
+    Make sure you've clicked at least one 🔊 button in this session
+  </Step>
+  
+  <Step title="Hover Over Button">
+    Move your mouse over any 🔊 button
+  </Step>
+  
+  <Step title="Cry Plays Automatically">
+    The Pokémon's cry plays on hover without needing to click
+  </Step>
+</Steps>
+
+<Tip>
+  Hover mode lets you quickly "preview" different Pokémon cries by moving your mouse across multiple cards!
+</Tip>
+
+## Audio Behavior
+
+### Volume Control
+
+- Cries play at 40% volume by default for comfortable listening
+- Use your browser or system volume controls to adjust overall volume
+- Each cry respects your system's audio settings
+
+### Playback Rules
+
+<Accordion title="What happens if I play multiple cries?">
+  Only one Pokémon cry plays at a time:
+  - Starting a new cry stops the currently playing cry
+  - The new cry starts immediately
+  - This prevents audio overlap and confusion
+</Accordion>
+
+<Accordion title="Can I stop a cry mid-playback?">
+  Yes! Click or hover on another Pokémon's 🔊 button to:
+  - Stop the current cry immediately
+  - Start the new Pokémon's cry
+  
+  Or simply wait for the cry to finish naturally (most cries are 1-3 seconds long)
+</Accordion>
+
+<Accordion title="What if playback fails?">
+  If a cry fails to play:
+  - The button returns to 🔊 immediately
+  - An error is logged to the console
+  - Try clicking again or check your internet connection
+  - Some older Pokémon may have incomplete audio data
+</Accordion>
+
+## Visual Feedback
+
+The audio button provides clear visual feedback about playback state:
+
+| Button State | Meaning |
+|--------------|----------|
+| 🔊 | Ready to play (click or hover) |
+| 🎵 | Currently playing |
+| 🔊 (returns) | Playback finished |
+
+The button also has a CSS class `playing` during playback, which adds visual styling to indicate active playback.
+
+## Cry Audio Sources
+
+Pokémon cry audio comes from the PokeAPI, which provides:
+
+- **Latest cries**: Modern game versions (preferred)
+- **Legacy cries**: Older game versions (fallback)
+
+<Info>
+  The app automatically selects the best available cry version for each Pokémon, preferring the latest version when available.
+</Info>
+
+## Audio Activation Tips
+
+<Tip>
+  **For First-Time Users**: The tooltip on the 🔊 button says "Clic para activar audio, luego hover para escuchar" (Click to activate audio, then hover to listen) - this is your quick guide!
+</Tip>
+
+**Best Practices:**
+
+1. **Click once anywhere** to activate audio for the whole session
+2. **Use hover mode** to quickly compare different Pokémon cries
+3. **Respect quiet environments** - remember the audio plays automatically on hover after activation
+4. **Adjust volume first** before activating if you're in a shared space
+
+## Troubleshooting Audio
+
+<Accordion title="No sound is playing">
+  Check these common issues:
+  - ✓ Have you clicked a 🔊 button at least once this session?
+  - ✓ Is your system volume turned up?
+  - ✓ Is your browser muted?
+  - ✓ Does the Pokémon have cry data? (No button = no data)
+  - ✓ Is your internet connection stable?
+</Accordion>
+
+<Accordion title="Audio cuts off too quickly">
+  This is normal behavior when you:
+  - Hover over another Pokémon's button
+  - Click another audio button
+  - Navigate away from the page
+  
+  Only one cry plays at a time to prevent audio chaos!
+</Accordion>
+
+<Accordion title="Hover doesn't work">
+  Make sure you've clicked at least one 🔊 button first! The audioActivated flag must be set to true before hover functionality works.
+</Accordion>
+
+<Accordion title="Button shows but no cry plays">
+  - Check browser console for errors
+  - The API audio file might be temporarily unavailable
+  - Try refreshing the page and activating audio again
+  - Some Pokémon may have incomplete or corrupted audio data
+</Accordion>
+
+## Browser Compatibility
+
+The audio feature uses the Web Audio API and works in all modern browsers:
+
+- ✅ Chrome/Edge 90+
+- ✅ Firefox 88+
+- ✅ Safari 14+
+- ✅ Opera 76+
+
+<Note>
+  The browser autoplay policy requires user interaction before audio can play. This is why the initial click is necessary.
+</Note>
+
+## Privacy and Data Usage
+
+Audio data is:
+
+- **Streamed on-demand**: Audio files are not pre-loaded, saving bandwidth
+- **Not stored locally**: Each playback streams from the PokeAPI
+- **Lightweight**: Most cry files are very small (under 100KB)
+- **Optional**: You control when audio plays
+
+<Tip>
+  If you're on a metered connection, be aware that playing many Pokémon cries will use data. Each cry is typically 20-80KB.
+</Tip>
+
+## Fun Audio Experiments
+
+<CardGroup cols={2}>
+  <Card title="Compare Evolutions">
+    Listen to how Pokémon cries change through evolution stages
+    
+    Example: Bulbasaur → Ivysaur → Venusaur
+  </Card>
+  <Card title="Type Patterns">
+    Notice similarities in cries of same-type Pokémon
+    
+    Try listening to multiple Dragon or Ghost types
+  </Card>
+  <Card title="Legendary Themes">
+    Legendary Pokémon often have unique, memorable cries
+    
+    Search for legendary Pokémon and compare their sounds
+  </Card>
+  <Card title="Generation Differences">
+    Hear how cry quality and style evolved across generations
+    
+    Filter by generation and listen to representative Pokémon
+  </Card>
+</CardGroup>
+
+<Info>
+  The audio feature adds an immersive dimension to your Pokédex exploration, bringing these creatures to life with their authentic game sounds!
+</Info>

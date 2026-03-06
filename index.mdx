@@ -1,97 +1,106 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: "Pokémon Explorer"
+description: "Discover and explore over 1,300 Pokémon with advanced search and filtering capabilities"
 ---
 
-## Setting up
+## Welcome to Pokémon Explorer
 
-Get your documentation site up and running in minutes.
+An interactive web-based Pokédex built with vanilla JavaScript that lets you explore the entire world of Pokémon. Search by name, filter by type, generation, color, habitat, and more - all powered by the comprehensive [PokeAPI](https://pokeapi.co/).
 
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
-
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
+<CardGroup cols={2}>
   <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
+    title="Quick Start"
+    icon="rocket"
+    href="/quickstart"
   >
-    Edit your docs locally and preview them in real time.
+    Get up and running in under 2 minutes
   </Card>
   <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
+    title="Installation"
+    icon="download"
+    href="/installation"
   >
-    Customize the design and colors of your site to match your brand.
-  </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+    Set up the project locally on your machine
   </Card>
   <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
+    title="Features Overview"
+    icon="sparkles"
+    href="/features/search"
   >
-    Auto-generate API documentation from OpenAPI specifications.
-  </Card>
-</Columns>
-
-## Create beautiful pages
-
-Everything you need to create world-class documentation.
-
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
+    Explore the powerful search and filtering capabilities
   </Card>
   <Card
-    title="Code samples"
+    title="API Reference"
     icon="code"
-    href="/essentials/code"
+    href="/api/pokemon-explorer"
   >
-    Add sample code to demonstrate how to use your product.
+    Dive into the PokemonExplorer class documentation
+  </Card>
+</CardGroup>
+
+## Key Features
+
+<CardGroup cols={2}>
+  <Card
+    title="Smart Search"
+    icon="magnifying-glass"
+    href="/features/search"
+  >
+    Real-time search with multi-criteria support in Spanish and English
   </Card>
   <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
+    title="Advanced Filters"
+    icon="filter"
+    href="/features/filters"
   >
-    Display images and other media.
+    Filter by type, generation, color, habitat, size, and weight
   </Card>
   <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
+    title="Interactive Cards"
+    icon="cards-blank"
+    href="/features/pokemon-cards"
   >
-    Write once and reuse across your docs.
+    Beautiful cards with stats, abilities, and Pokémon images
   </Card>
-</Columns>
+  <Card
+    title="Audio Playback"
+    icon="volume-high"
+    href="/guide/audio-features"
+  >
+    Listen to authentic Pokémon cries from the PokeAPI
+  </Card>
+</CardGroup>
 
-## Need inspiration?
+## Built With Modern JavaScript
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+Pokémon Explorer is built with vanilla JavaScript, HTML5, and CSS3 - no frameworks required. The application demonstrates:
+
+- **Class-based architecture** with the `PokemonExplorer` and `PokemonTour` classes
+- **Async/await patterns** for efficient API data fetching
+- **Smart caching** using Map data structures for optimal performance
+- **Event-driven UI** with debounced search and real-time suggestions
+- **Responsive design** with animated UI elements and smooth transitions
+
+<CardGroup cols={3}>
+  <Card
+    title="User Guide"
+    icon="book-open"
+    href="/guide/searching"
+  >
+    Learn how to search and filter Pokémon
+  </Card>
+  <Card
+    title="Interactive Tour"
+    icon="map-location-dot"
+    href="/guide/interactive-tour"
+  >
+    Explore the guided tour feature
+  </Card>
+  <Card
+    title="View on GitHub"
+    icon="github"
+    href="https://github.com/mueses1/PokeApi"
+  >
+    Check out the source code
+  </Card>
+</CardGroup>

@@ -1,0 +1,273 @@
+---
+title: "Advanced Filters"
+description: "Filter Pokémon by type, generation, color, habitat, size, and weight"
+---
+
+## Overview
+
+Pokémon Explorer provides powerful filtering capabilities through dropdown menus, allowing you to narrow down the Pokémon list by multiple criteria simultaneously.
+
+## Available Filters
+
+<CardGroup cols={2}>
+  <Card title="Type Filter" icon="wand-magic-sparkles">
+    Filter by Pokémon type (Fire, Water, Grass, etc.)
+  </Card>
+  <Card title="Generation Filter" icon="clock">
+    Select Pokémon from specific generations (Gen I-IX)
+  </Card>
+  <Card title="Color Filter" icon="palette">
+    Filter by Pokémon's primary color
+  </Card>
+  <Card title="Habitat Filter" icon="tree">
+    Filter by natural habitat
+  </Card>
+  <Card title="Size Filter" icon="ruler-vertical">
+    Filter by height category
+  </Card>
+  <Card title="Weight Filter" icon="weight-scale">
+    Filter by weight category
+  </Card>
+</CardGroup>
+
+## Filter Implementation
+
+### Apply Filters Method
+
+The main filtering logic is handled by the `applyFilters()` method:
+
+```javascript logica.js
+async applyFilters() {
+    const { typeFilter, generationFilter, colorFilter, habitatFilter, sizeFilter, weightFilter } = this.elements;
+    const criteria = {
+        type: typeFilter?.value || null,
+        generation: generationFilter?.value || null,
+        color: colorFilter?.value || null,
+        habitat: habitatFilter?.value || null,
+        size: sizeFilter?.value || null,
+        weight: weightFilter?.value || null
+    };
+
+    this.showLoading(true);
+
+    try {
+        if (criteria.generation) {
+            await this.ensureGenerationLoaded(criteria.generation);
+        }
+        if (criteria.type) {
+            await this.loadPokemonByType(criteria.type);
+        }
+
+        this.filteredPokemon = this._applyPokemonFilters([...this.pokemonById.values()], criteria);
+    } catch (error) {
+        console.error('Error al aplicar filtros:', error);
+        this.showError('Error al aplicar filtros');
+    } finally {
+        this.showLoading(false);
+    }
+
+    this.currentPage = 1;
+    this.displayPokemon();
+    this.updatePagination();
+}
+```
+
+### Internal Filter Logic
+
+The `_applyPokemonFilters()` method performs the actual filtering:
+
+```javascript logica.js
+_applyPokemonFilters(pokemonList, criteria) {
+    return pokemonList.filter(p => {
+        if (criteria.name && !p.name.toLowerCase().includes(criteria.name.toLowerCase())) return false;
+        if (criteria.type && !p.types.includes(criteria.type)) return false;
+        if (criteria.color && p.color !== criteria.color) return false;
+        if (criteria.habitat && p.habitat !== criteria.habitat) return false;
+
+        if (criteria.generation) {
+            const [start, end] = this.constants.genRanges[criteria.generation];
+            if (p.id < start || p.id > end) return false;
+        }
+
+        if (criteria.size) {
+            const height = p.height;
+            switch (criteria.size) {
+                case 'tiny': if (height >= 0.5) return false; break;
+                case 'small': if (height < 0.5 || height >= 1) return false; break;
+                case 'medium': if (height < 1 || height >= 2) return false; break;
+                case 'large': if (height < 2 || height >= 3) return false; break;
+                case 'huge': if (height < 3) return false; break;
+            }
+        }
+
+        if (criteria.weight) {
+            const weight = p.weight;
+            switch (criteria.weight) {
+                case 'light': if (weight >= 10) return false; break;
+                case 'normal': if (weight < 10 || weight >= 50) return false; break;
+                case 'heavy': if (weight < 50 || weight >= 100) return false; break;
+                case 'massive': if (weight < 100) return false; break;
+            }
+        }
+
+        return true;
+    });
+}
+```
+
+## Generation Filter
+
+The generation filter covers all nine Pokémon generations:
+
+<Tabs>
+  <Tab title="Generation Ranges">
+    ```javascript logica.js
+    genRanges: {
+        '1': [1, 151],      // Gen I - Kanto
+        '2': [152, 251],    // Gen II - Johto
+        '3': [252, 386],    // Gen III - Hoenn
+        '4': [387, 493],    // Gen IV - Sinnoh
+        '5': [494, 649],    // Gen V - Unova
+        '6': [650, 721],    // Gen VI - Kalos
+        '7': [722, 809],    // Gen VII - Alola
+        '8': [810, 905],    // Gen VIII - Galar
+        '9': [906, 1025]    // Gen IX - Paldea
+    }
+    ```
+  </Tab>
+  <Tab title="Lazy Loading">
+    ```javascript logica.js
+    async ensureGenerationLoaded(genNumber) {
+        if (!this.constants.genRanges[genNumber]) return;
+        const [start, end] = this.constants.genRanges[genNumber];
+        const neededIds = Array.from({ length: end - start + 1 }, (_, i) => start + i)
+            .filter(id => !this.pokemonById.has(id));
+        if (neededIds.length > 0) {
+            await this.loadMissingPokemon(neededIds, 'id');
+        }
+    }
+    ```
+  </Tab>
+</Tabs>
+
+<Info>
+When you select a generation, the app automatically loads all Pokémon from that generation if they haven't been cached yet.
+</Info>
+
+## Type Filter
+
+The type filter supports all 18 Pokémon types:
+
+```javascript logica.js
+const commonTypes = [
+    'normal', 'fire', 'water', 'electric', 'grass', 'ice',
+    'fighting', 'poison', 'ground', 'flying', 'psychic', 'bug',
+    'rock', 'ghost', 'dragon', 'dark', 'steel', 'fairy'
+];
+```
+
+### Load Pokémon by Type
+
+When filtering by type, the app loads all Pokémon of that type:
+
+```javascript logica.js
+async loadPokemonByType(type) {
+    const currentTypePokemons = [...this.pokemonById.values()]
+        .filter(p => p.types.includes(type));
+
+    if (currentTypePokemons.length < 10) {
+        try {
+            const response = await fetch(`${this.API_BASE_URL}/type/${type}`);
+            const pokemonList = (await response.json()).pokemon
+                .map(p => p.pokemon)
+                .filter(p => parseInt(p.url.split('/').slice(-2, -1)[0]) <= 1025);
+
+            await this.loadMissingPokemon(pokemonList, 'name');
+        } catch (error) {
+            console.error('Error al cargar pokemon por tipo:', error);
+        }
+    }
+}
+```
+
+## Size and Weight Filters
+
+### Size Categories
+
+Pokémon are filtered by height in meters:
+
+- **Tiny**: < 0.5m
+- **Small**: 0.5m - 1m
+- **Medium**: 1m - 2m
+- **Large**: 2m - 3m
+- **Huge**: > 3m
+
+### Weight Categories
+
+Pokémon are filtered by weight in kilograms:
+
+- **Light**: < 10kg
+- **Normal**: 10kg - 50kg
+- **Heavy**: 50kg - 100kg
+- **Massive**: > 100kg
+
+<Warning>
+Size and weight data comes directly from the PokeAPI and is measured in decimeters (height) and hectograms (weight) in the API, but is converted to meters and kilograms for display.
+</Warning>
+
+## Filter Population
+
+Filters are dynamically populated from the PokeAPI:
+
+```javascript logica.js
+async loadInitialData() {
+    try {
+        const [types, colors, habitats] = await Promise.all([
+            fetch(`${this.API_BASE_URL}/type`).then(res => res.json()),
+            fetch(`${this.API_BASE_URL}/pokemon-color`).then(res => res.json()),
+            fetch(`${this.API_BASE_URL}/pokemon-habitat`).then(res => res.json())
+        ]);
+
+        this.pokemonTypes = types.results;
+        this.pokemonColors = colors.results;
+        this.pokemonHabitats = habitats.results;
+
+        this.populateFilters();
+        this.loadPokemon();
+    } catch (error) {
+        console.error('Error al cargar datos iniciales:', error);
+    }
+}
+```
+
+## Combining Filters
+
+<Note>
+All filters can be combined simultaneously. For example, you can filter for "Fire-type Pokémon from Generation I that are red and found in mountains."
+</Note>
+
+<Steps>
+  <Step title="Select Type">
+    Choose a Pokémon type from the dropdown
+  </Step>
+  <Step title="Select Generation">
+    Optionally narrow down by generation
+  </Step>
+  <Step title="Add More Filters">
+    Add color, habitat, size, or weight filters as needed
+  </Step>
+  <Step title="View Results">
+    The Pokémon grid updates automatically with filtered results
+  </Step>
+</Steps>
+
+## Performance Considerations
+
+1. **Lazy Loading**: Data is only fetched when filters are applied
+2. **Caching**: Once loaded, Pokémon data is cached in memory
+3. **Batch Processing**: Multiple Pokémon are loaded in parallel batches
+4. **Efficient Filtering**: Uses native JavaScript filter operations
+
+<Tip>
+Clear all filters by refreshing the page or by manually setting each filter back to its default "All" option.
+</Tip>
